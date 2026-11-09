@@ -1,0 +1,13 @@
+{
+  "name": "mermaid-validate",
+  "private": true,
+  "type": "module",
+  "description": "Parses every Mermaid block in the repository's Markdown with the same parser GitHub uses.",
+  "scripts": {
+    "validate": "node validate-mermaid.mjs"
+  },
+  "dependencies": {
+    "jsdom": "26.1.0",
+    "mermaid": "11.12.1"
+  }
+}

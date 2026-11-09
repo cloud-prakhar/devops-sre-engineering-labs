@@ -1,0 +1,22 @@
+# External links break for reasons outside this repository, so they are checked on demand
+# (Actions tab → external-links → Run workflow) instead of blocking pull requests.
+name: external-links
+
+on:
+  workflow_dispatch:   # manual only, by design — do not add a schedule
+
+permissions:
+  contents: read
+
+jobs:
+  lychee:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: lychee
+        run: >
+          docker run --rm -v "$PWD:/repo" -w /repo lycheeverse/lychee:0.24.1
+          --config .lychee.toml --no-progress './**/*.md'

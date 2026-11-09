@@ -1,0 +1,63 @@
+#cloud-config
+# Baseline for AWS lab 01. Every setting here is inspected or changed in docs/exercises.md.
+package_update: true
+package_upgrade: true
+packages:
+  - ufw
+  - unattended-upgrades
+  - sysstat
+  - stress-ng
+  - jq
+  - python3-venv
+  - rsync
+  - auditd
+
+groups:
+  - ssh-users
+
+write_files:
+  - path: /etc/systemd/journald.conf.d/lab.conf
+    encoding: b64
+    content: ${journald}
+    permissions: "0644"
+  - path: /etc/apt/apt.conf.d/52-lab-unattended-upgrades
+    encoding: b64
+    content: ${unattended}
+    permissions: "0644"
+  - path: /etc/systemd/system/taskboard.service
+    encoding: b64
+    content: ${taskboard_service}
+    permissions: "0644"
+  - path: /usr/local/sbin/host-audit
+    encoding: b64
+    content: ${host_audit}
+    permissions: "0755"
+  - path: /usr/local/sbin/lab-fault
+    encoding: b64
+    content: ${lab_fault}
+    permissions: "0755"
+  - path: /usr/local/sbin/install-taskboard
+    encoding: b64
+    content: ${install_taskboard}
+    permissions: "0755"
+  # defer: written in the final stage, after the ubuntu user and ssh-users group exist,
+  # so AllowGroups can never lock out the admin user during first boot.
+  - path: /etc/ssh/sshd_config.d/10-lab-hardening.conf
+    encoding: b64
+    content: ${sshd_hardening}
+    permissions: "0644"
+    defer: true
+
+runcmd:
+  - [usermod, -aG, ssh-users, ubuntu]
+  - [sh, -c, "sshd -t && systemctl restart ssh"]
+  - [ufw, default, deny, incoming]
+  - [ufw, default, allow, outgoing]
+  - [ufw, allow, OpenSSH]
+  - [ufw, --force, enable]
+  - [systemctl, restart, systemd-journald]
+  - [systemctl, enable, --now, sysstat]
+  - [systemctl, enable, --now, unattended-upgrades]
+  - [systemctl, daemon-reload]
+
+final_message: "lab01 cloud-init finished after $UPTIME seconds"

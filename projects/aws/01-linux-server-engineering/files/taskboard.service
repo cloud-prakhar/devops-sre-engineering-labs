@@ -1,0 +1,62 @@
+# /etc/systemd/system/taskboard.service
+# Runs the Taskboard API natively (no containers) with systemd sandboxing.
+# Inspect the sandbox score with:  systemd-analyze security taskboard
+[Unit]
+Description=Taskboard API (lab 01)
+Documentation=https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html
+After=network-online.target
+Wants=network-online.target
+# Give up after 5 failed starts in 60 s instead of restarting forever (a crash loop
+# hides the real error and burns CPU credits).
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=exec
+User=taskboard
+Group=taskboard
+WorkingDirectory=/opt/taskboard/app
+Environment=DATABASE_URL=sqlite:////var/lib/taskboard/taskboard.db
+Environment=APP_VERSION=lab01
+EnvironmentFile=-/etc/taskboard/taskboard.env
+# Bound to loopback: only reachable from the host itself or through an SSH tunnel.
+ExecStart=/opt/taskboard/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --no-access-log
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=20
+
+# /var/lib/taskboard, created and owned by the service user
+StateDirectory=taskboard
+StateDirectoryMode=0750
+UMask=0027
+
+# Resource guards
+MemoryMax=300M
+TasksMax=64
+CPUQuota=80%
+
+# Sandboxing
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged
+
+[Install]
+WantedBy=multi-user.target

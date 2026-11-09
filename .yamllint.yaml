@@ -1,0 +1,11 @@
+extends: default
+ignore: |
+  **/node_modules/
+  **/.terraform/
+rules:
+  line-length: { max: 140 }
+  document-start: disable
+  truthy: { check-keys: false }
+  comments: { min-spaces-from-content: 1 }
+  braces: { max-spaces-inside: 1 }
+  indentation: { spaces: consistent, indent-sequences: whatever }

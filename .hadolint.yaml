@@ -1,0 +1,5 @@
+failure-threshold: warning
+ignored:
+  # DL3018: pin apk versions. Alpine removes old package versions from its mirrors, so exact pins
+  # break rebuilds; the base image tag is pinned instead and rebuilt by Dependabot.
+  - DL3018

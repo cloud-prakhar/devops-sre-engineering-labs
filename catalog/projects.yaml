@@ -1,0 +1,1142 @@
+# Machine-readable catalog of all 45 projects (15 themes x 3 clouds).
+# Source of truth for status. docs/progress/implementation-tracker.md is generated from it:
+#   python3 scripts/catalog.py tracker --write
+# Validate after every change:
+#   python3 scripts/catalog.py validate
+#
+# free_tier.fit is an assessment against each provider's free offer at the time of writing, not a
+# guarantee. Free-tier terms differ by account age and plan; always check your own account.
+schema_version: 1
+status_values:
+  planned: Designed in this catalog; no files yet
+  implemented: Code, docs, ADRs, cost, troubleshooting and interview material exist; static checks pass
+  deployment-tested: Deployed to the real cloud, verify script passed, and cleaned up (recorded with date)
+validation_values:
+  passed: check ran and passed
+  failed: check ran and failed
+  not-run: check not run
+  not-tested: never deployed to the cloud
+  n/a: check does not apply
+projects:
+- id: aws-01
+  cloud: aws
+  number: 1
+  title: Linux Server Engineering
+  difficulty: beginner
+  build_hours: 4
+  depends_on: []
+  services:
+  - EC2
+  - VPC
+  - IAM
+  - Systems Manager
+  skills: &id001
+  - ssh
+  - users-and-sudo
+  - systemd
+  - firewalls
+  - dns
+  - logs
+  - patching
+  - performance-troubleshooting
+  free_tier:
+    fit: fits
+    notes: 1 x t3.micro, 20 GB gp3, 1 public IPv4
+  status: implemented
+  validation:
+    static: passed
+    local: n/a
+    deployment: not-tested
+  path: projects/aws/01-linux-server-engineering
+- id: aws-02
+  cloud: aws
+  number: 2
+  title: Dockerized Application on Cloud VM
+  difficulty: beginner
+  build_hours: 3
+  depends_on:
+  - aws-01
+  services:
+  - EC2
+  - VPC
+  - IAM
+  skills: &id002
+  - dockerfile
+  - multi-stage-builds
+  - container-security
+  - volumes
+  - health-checks
+  - container-logs
+  free_tier:
+    fit: fits
+    notes: 1 x t3.micro
+  status: implemented
+  validation:
+    static: passed
+    local: passed
+    deployment: not-tested
+  path: projects/aws/02-dockerized-app-on-vm
+- id: aws-03
+  cloud: aws
+  number: 3
+  title: Multi-Service Docker Application
+  difficulty: beginner
+  build_hours: 4
+  depends_on:
+  - aws-02
+  services:
+  - EC2
+  - VPC
+  - IAM
+  skills: &id003
+  - docker-compose
+  - reverse-proxy
+  - tls
+  - service-discovery
+  - network-segmentation
+  - backup-restore
+  free_tier:
+    fit: fits
+    notes: 1 x t3.micro
+  status: implemented
+  validation:
+    static: passed
+    local: passed
+    deployment: not-tested
+  path: projects/aws/03-multi-service-docker-app
+- id: aws-04
+  cloud: aws
+  number: 4
+  title: Terraform Networking Foundations
+  difficulty: intermediate
+  build_hours: 5
+  depends_on:
+  - aws-01
+  services:
+  - VPC
+  - NAT Gateway
+  - S3 (state + lock file)
+  - IAM
+  skills: &id004
+  - terraform-modules
+  - remote-state
+  - state-locking
+  - subnetting
+  - routing
+  - nat
+  - firewall-rules
+  free_tier:
+    fit: partial
+    notes: NAT Gateway is never free; lab will offer a NAT-less or NAT-instance variant
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/aws/04-terraform-networking-foundations
+- id: aws-05
+  cloud: aws
+  number: 5
+  title: Highly Available Server Application
+  difficulty: intermediate
+  build_hours: 5
+  depends_on:
+  - aws-02
+  - aws-04
+  services:
+  - Application Load Balancer
+  - EC2 Auto Scaling
+  - Launch Templates
+  - CloudWatch
+  skills: &id005
+  - load-balancing
+  - autoscaling
+  - health-checks
+  - fault-tolerance
+  - immutable-infrastructure
+  free_tier:
+    fit: partial
+    notes: ALB and >1 instance-hour per hour; short sessions only
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/aws/05-highly-available-server-app
+- id: aws-06
+  cloud: aws
+  number: 6
+  title: Secure CI/CD and Container Registry
+  difficulty: intermediate
+  build_hours: 5
+  depends_on:
+  - aws-02
+  services:
+  - ECR
+  - IAM OIDC provider
+  - GitHub Actions
+  skills: &id006
+  - github-actions
+  - oidc-federation
+  - image-scanning
+  - provenance
+  - rollback
+  - deployment-verification
+  free_tier:
+    fit: partial
+    notes: ECR storage allowance is small; GitHub Actions minutes free on public repos
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/aws/06-secure-cicd-container-registry
+- id: aws-07
+  cloud: aws
+  number: 7
+  title: Managed Kubernetes Foundations
+  difficulty: intermediate
+  build_hours: 6
+  depends_on:
+  - aws-04
+  services:
+  - EKS
+  - IAM
+  - VPC CNI
+  - EKS Pod Identity
+  skills: &id007
+  - control-plane
+  - node-pools
+  - cluster-auth
+  - rbac
+  - cni
+  - coredns
+  - managed-addons
+  free_tier:
+    fit: 'no'
+    notes: EKS control plane is billed per hour on every plan
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/aws/07-managed-kubernetes-foundations
+- id: aws-08
+  cloud: aws
+  number: 8
+  title: Kubernetes Networking and Autoscaling
+  difficulty: intermediate
+  build_hours: 6
+  depends_on:
+  - aws-07
+  services:
+  - EKS
+  - AWS Load Balancer Controller
+  - Metrics Server
+  skills: &id008
+  - services
+  - ingress
+  - probes
+  - requests-limits
+  - hpa
+  - networkpolicy
+  - pdb
+  - rolling-updates
+  free_tier:
+    fit: 'no'
+    notes: EKS control plane is billed per hour on every plan
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/aws/08-kubernetes-networking-autoscaling
+- id: aws-09
+  cloud: aws
+  number: 9
+  title: Helm and Argo CD GitOps
+  difficulty: advanced
+  build_hours: 6
+  depends_on:
+  - aws-06
+  - aws-08
+  services:
+  - EKS
+  - ECR
+  - Argo CD
+  - Helm
+  skills: &id009
+  - helm
+  - gitops
+  - argocd
+  - environment-config
+  - drift-detection
+  - rollback
+  free_tier:
+    fit: 'no'
+    notes: EKS control plane is billed per hour on every plan
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/aws/09-helm-argocd-gitops
+- id: aws-10
+  cloud: aws
+  number: 10
+  title: Stateful Kubernetes Workloads
+  difficulty: advanced
+  build_hours: 6
+  depends_on:
+  - aws-08
+  services:
+  - EKS
+  - EBS CSI driver
+  - AWS Backup
+  skills: &id010
+  - pvc
+  - storageclass
+  - statefulset
+  - volume-snapshots
+  - backup-restore
+  free_tier:
+    fit: 'no'
+    notes: EKS control plane is billed per hour on every plan
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/aws/10-stateful-kubernetes-workloads
+- id: aws-11
+  cloud: aws
+  number: 11
+  title: Prometheus, Grafana and Alertmanager
+  difficulty: advanced
+  build_hours: 6
+  depends_on:
+  - aws-08
+  services:
+  - EKS
+  - Prometheus
+  - Grafana
+  - Alertmanager
+  skills: &id011
+  - promql
+  - exporters
+  - service-discovery
+  - alerting
+  - blackbox-probing
+  - golden-signals
+  - slos
+  free_tier:
+    fit: 'no'
+    notes: EKS control plane is billed per hour on every plan
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/aws/11-prometheus-grafana-alertmanager
+- id: aws-12
+  cloud: aws
+  number: 12
+  title: Centralized Logging with Elastic Stack
+  difficulty: advanced
+  build_hours: 6
+  depends_on:
+  - aws-08
+  services:
+  - EKS
+  - Elasticsearch (ECK)
+  - Fluent Bit
+  - EBS
+  skills: &id012
+  - log-collection
+  - parsing
+  - index-lifecycle
+  - kibana
+  - log-security
+  - storage-cost
+  free_tier:
+    fit: 'no'
+    notes: EKS control plane is billed per hour on every plan
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/aws/12-centralized-logging-elastic
+- id: aws-13
+  cloud: aws
+  number: 13
+  title: Distributed Tracing
+  difficulty: advanced
+  build_hours: 5
+  depends_on:
+  - aws-11
+  services:
+  - EKS
+  - OpenTelemetry Collector
+  - Jaeger
+  skills: &id013
+  - opentelemetry
+  - spans
+  - context-propagation
+  - service-maps
+  - metrics-logs-traces-correlation
+  free_tier:
+    fit: 'no'
+    notes: EKS control plane is billed per hour on every plan
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/aws/13-distributed-tracing
+- id: aws-14
+  cloud: aws
+  number: 14
+  title: SRE Failure and Recovery Lab
+  difficulty: advanced
+  build_hours: 6
+  depends_on:
+  - aws-11
+  - aws-12
+  services:
+  - EKS
+  - CloudWatch
+  - Chaos Mesh
+  skills: &id014
+  - incident-response
+  - chaos-engineering
+  - root-cause-analysis
+  - postmortems
+  - runbooks
+  free_tier:
+    fit: 'no'
+    notes: EKS control plane is billed per hour on every plan
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/aws/14-sre-failure-recovery-lab
+- id: aws-15
+  cloud: aws
+  number: 15
+  title: Production-Inspired DevOps/SRE Capstone
+  difficulty: advanced
+  build_hours: 12
+  depends_on:
+  - aws-09
+  - aws-10
+  - aws-11
+  - aws-12
+  - aws-13
+  - aws-14
+  services:
+  - EKS
+  - RDS
+  - Secrets Manager
+  - ACM
+  - Route 53
+  - ECR
+  skills: &id015
+  - architecture-review
+  - slos
+  - dr
+  - cost-optimization
+  - security-review
+  - end-to-end-delivery
+  free_tier:
+    fit: 'no'
+    notes: EKS control plane is billed per hour on every plan
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/aws/15-devops-sre-capstone
+- id: azure-01
+  cloud: azure
+  number: 1
+  title: Linux Server Engineering
+  difficulty: beginner
+  build_hours: 4
+  depends_on: []
+  services:
+  - Virtual Machines
+  - Virtual Network
+  - NSG
+  - Managed Identity
+  skills: *id001
+  free_tier:
+    fit: fits
+    notes: B1s/B2ats v2 hours in the 12-month free services (verify)
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/azure/01-linux-server-engineering
+- id: azure-02
+  cloud: azure
+  number: 2
+  title: Dockerized Application on Cloud VM
+  difficulty: beginner
+  build_hours: 3
+  depends_on:
+  - azure-01
+  services:
+  - Virtual Machines
+  - Virtual Network
+  skills: *id002
+  free_tier:
+    fit: fits
+    notes: same VM size as 01 (verify)
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/azure/02-dockerized-app-on-vm
+- id: azure-03
+  cloud: azure
+  number: 3
+  title: Multi-Service Docker Application
+  difficulty: beginner
+  build_hours: 4
+  depends_on:
+  - azure-02
+  services:
+  - Virtual Machines
+  - Virtual Network
+  skills: *id003
+  free_tier:
+    fit: fits
+    notes: same VM size as 01 (verify)
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/azure/03-multi-service-docker-app
+- id: azure-04
+  cloud: azure
+  number: 4
+  title: Terraform Networking Foundations
+  difficulty: intermediate
+  build_hours: 5
+  depends_on:
+  - azure-01
+  services:
+  - Virtual Network
+  - NAT Gateway
+  - Storage Account (state)
+  - NSG
+  skills: *id004
+  free_tier:
+    fit: partial
+    notes: NAT Gateway is billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/azure/04-terraform-networking-foundations
+- id: azure-05
+  cloud: azure
+  number: 5
+  title: Highly Available Server Application
+  difficulty: intermediate
+  build_hours: 5
+  depends_on:
+  - azure-02
+  - azure-04
+  services:
+  - Virtual Machine Scale Sets
+  - Azure Load Balancer
+  - Azure Monitor
+  skills: *id005
+  free_tier:
+    fit: partial
+    notes: Scale Set instances beyond free hours; Standard Load Balancer is billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/azure/05-highly-available-server-app
+- id: azure-06
+  cloud: azure
+  number: 6
+  title: Secure CI/CD and Container Registry
+  difficulty: intermediate
+  build_hours: 5
+  depends_on:
+  - azure-02
+  services:
+  - Azure Container Registry
+  - Entra workload identity federation
+  - GitHub Actions
+  skills: *id006
+  free_tier:
+    fit: partial
+    notes: ACR Basic tier is billed per day
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/azure/06-secure-cicd-container-registry
+- id: azure-07
+  cloud: azure
+  number: 7
+  title: Managed Kubernetes Foundations
+  difficulty: intermediate
+  build_hours: 6
+  depends_on:
+  - azure-04
+  services:
+  - AKS
+  - Entra ID
+  - Azure CNI Overlay
+  skills: *id007
+  free_tier:
+    fit: partial
+    notes: AKS Free tier has no control-plane fee; worker nodes and disks are billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/azure/07-managed-kubernetes-foundations
+- id: azure-08
+  cloud: azure
+  number: 8
+  title: Kubernetes Networking and Autoscaling
+  difficulty: intermediate
+  build_hours: 6
+  depends_on:
+  - azure-07
+  services:
+  - AKS
+  - Application Routing add-on
+  - Metrics Server
+  skills: *id008
+  free_tier:
+    fit: partial
+    notes: AKS Free tier has no control-plane fee; worker nodes and disks are billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/azure/08-kubernetes-networking-autoscaling
+- id: azure-09
+  cloud: azure
+  number: 9
+  title: Helm and Argo CD GitOps
+  difficulty: advanced
+  build_hours: 6
+  depends_on:
+  - azure-06
+  - azure-08
+  services:
+  - AKS
+  - ACR
+  - Argo CD
+  - Helm
+  skills: *id009
+  free_tier:
+    fit: partial
+    notes: AKS Free tier has no control-plane fee; worker nodes and disks are billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/azure/09-helm-argocd-gitops
+- id: azure-10
+  cloud: azure
+  number: 10
+  title: Stateful Kubernetes Workloads
+  difficulty: advanced
+  build_hours: 6
+  depends_on:
+  - azure-08
+  services:
+  - AKS
+  - Azure Disk CSI driver
+  - Azure Backup for AKS
+  skills: *id010
+  free_tier:
+    fit: partial
+    notes: AKS Free tier has no control-plane fee; worker nodes and disks are billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/azure/10-stateful-kubernetes-workloads
+- id: azure-11
+  cloud: azure
+  number: 11
+  title: Prometheus, Grafana and Alertmanager
+  difficulty: advanced
+  build_hours: 6
+  depends_on:
+  - azure-08
+  services:
+  - AKS
+  - Prometheus
+  - Grafana
+  - Alertmanager
+  skills: *id011
+  free_tier:
+    fit: partial
+    notes: AKS Free tier has no control-plane fee; worker nodes and disks are billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/azure/11-prometheus-grafana-alertmanager
+- id: azure-12
+  cloud: azure
+  number: 12
+  title: Centralized Logging with Elastic Stack
+  difficulty: advanced
+  build_hours: 6
+  depends_on:
+  - azure-08
+  services:
+  - AKS
+  - Elasticsearch (ECK)
+  - Fluent Bit
+  - Azure Disk
+  skills: *id012
+  free_tier:
+    fit: 'no'
+    notes: Elasticsearch needs nodes far above free-tier sizes
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/azure/12-centralized-logging-elastic
+- id: azure-13
+  cloud: azure
+  number: 13
+  title: Distributed Tracing
+  difficulty: advanced
+  build_hours: 5
+  depends_on:
+  - azure-11
+  services:
+  - AKS
+  - OpenTelemetry Collector
+  - Jaeger
+  skills: *id013
+  free_tier:
+    fit: partial
+    notes: AKS Free tier has no control-plane fee; worker nodes and disks are billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/azure/13-distributed-tracing
+- id: azure-14
+  cloud: azure
+  number: 14
+  title: SRE Failure and Recovery Lab
+  difficulty: advanced
+  build_hours: 6
+  depends_on:
+  - azure-11
+  - azure-12
+  services:
+  - AKS
+  - Azure Chaos Studio
+  - Azure Monitor
+  skills: *id014
+  free_tier:
+    fit: partial
+    notes: AKS Free tier has no control-plane fee; worker nodes and disks are billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/azure/14-sre-failure-recovery-lab
+- id: azure-15
+  cloud: azure
+  number: 15
+  title: Production-Inspired DevOps/SRE Capstone
+  difficulty: advanced
+  build_hours: 12
+  depends_on:
+  - azure-09
+  - azure-10
+  - azure-11
+  - azure-12
+  - azure-13
+  - azure-14
+  services:
+  - AKS
+  - Azure Database for PostgreSQL
+  - Key Vault
+  - Front Door or Application Gateway
+  skills: *id015
+  free_tier:
+    fit: 'no'
+    notes: managed database, gateway and nodes are billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/azure/15-devops-sre-capstone
+- id: gcp-01
+  cloud: gcp
+  number: 1
+  title: Linux Server Engineering
+  difficulty: beginner
+  build_hours: 4
+  depends_on: []
+  services:
+  - Compute Engine
+  - VPC
+  - Firewall rules
+  - IAP TCP forwarding
+  skills: *id001
+  free_tier:
+    fit: fits
+    notes: e2-micro in us-west1/us-central1/us-east1, 30 GB standard PD; external IPv4 may be billed (verify)
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/gcp/01-linux-server-engineering
+- id: gcp-02
+  cloud: gcp
+  number: 2
+  title: Dockerized Application on Cloud VM
+  difficulty: beginner
+  build_hours: 3
+  depends_on:
+  - gcp-01
+  services:
+  - Compute Engine
+  - VPC
+  skills: *id002
+  free_tier:
+    fit: fits
+    notes: e2-micro (verify)
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/gcp/02-dockerized-app-on-vm
+- id: gcp-03
+  cloud: gcp
+  number: 3
+  title: Multi-Service Docker Application
+  difficulty: beginner
+  build_hours: 4
+  depends_on:
+  - gcp-02
+  services:
+  - Compute Engine
+  - VPC
+  skills: *id003
+  free_tier:
+    fit: partial
+    notes: e2-micro has 1 GB RAM; four services are tight
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/gcp/03-multi-service-docker-app
+- id: gcp-04
+  cloud: gcp
+  number: 4
+  title: Terraform Networking Foundations
+  difficulty: intermediate
+  build_hours: 5
+  depends_on:
+  - gcp-01
+  services:
+  - VPC
+  - Cloud NAT
+  - Cloud Storage (state)
+  - Firewall rules
+  skills: *id004
+  free_tier:
+    fit: partial
+    notes: Cloud NAT is billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/gcp/04-terraform-networking-foundations
+- id: gcp-05
+  cloud: gcp
+  number: 5
+  title: Highly Available Server Application
+  difficulty: intermediate
+  build_hours: 5
+  depends_on:
+  - gcp-02
+  - gcp-04
+  services:
+  - Managed Instance Groups
+  - Cloud Load Balancing
+  - Cloud Monitoring
+  skills: *id005
+  free_tier:
+    fit: partial
+    notes: external load balancer forwarding rules are billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/gcp/05-highly-available-server-app
+- id: gcp-06
+  cloud: gcp
+  number: 6
+  title: Secure CI/CD and Container Registry
+  difficulty: intermediate
+  build_hours: 5
+  depends_on:
+  - gcp-02
+  services:
+  - Artifact Registry
+  - Workload Identity Federation
+  - GitHub Actions
+  skills: *id006
+  free_tier:
+    fit: partial
+    notes: Artifact Registry storage beyond the free allowance is billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/gcp/06-secure-cicd-container-registry
+- id: gcp-07
+  cloud: gcp
+  number: 7
+  title: Managed Kubernetes Foundations
+  difficulty: intermediate
+  build_hours: 6
+  depends_on:
+  - gcp-04
+  services:
+  - GKE
+  - IAM
+  - Dataplane V2
+  skills: *id007
+  free_tier:
+    fit: partial
+    notes: GKE free-tier credit covers one cluster's management fee; nodes are billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/gcp/07-managed-kubernetes-foundations
+- id: gcp-08
+  cloud: gcp
+  number: 8
+  title: Kubernetes Networking and Autoscaling
+  difficulty: intermediate
+  build_hours: 6
+  depends_on:
+  - gcp-07
+  services:
+  - GKE
+  - Gateway API
+  - Metrics Server
+  skills: *id008
+  free_tier:
+    fit: partial
+    notes: GKE free-tier credit covers one cluster's management fee; nodes are billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/gcp/08-kubernetes-networking-autoscaling
+- id: gcp-09
+  cloud: gcp
+  number: 9
+  title: Helm and Argo CD GitOps
+  difficulty: advanced
+  build_hours: 6
+  depends_on:
+  - gcp-06
+  - gcp-08
+  services:
+  - GKE
+  - Artifact Registry
+  - Argo CD
+  - Helm
+  skills: *id009
+  free_tier:
+    fit: partial
+    notes: GKE free-tier credit covers one cluster's management fee; nodes are billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/gcp/09-helm-argocd-gitops
+- id: gcp-10
+  cloud: gcp
+  number: 10
+  title: Stateful Kubernetes Workloads
+  difficulty: advanced
+  build_hours: 6
+  depends_on:
+  - gcp-08
+  services:
+  - GKE
+  - Persistent Disk CSI driver
+  - Backup for GKE
+  skills: *id010
+  free_tier:
+    fit: partial
+    notes: GKE free-tier credit covers one cluster's management fee; nodes are billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/gcp/10-stateful-kubernetes-workloads
+- id: gcp-11
+  cloud: gcp
+  number: 11
+  title: Prometheus, Grafana and Alertmanager
+  difficulty: advanced
+  build_hours: 6
+  depends_on:
+  - gcp-08
+  services:
+  - GKE
+  - Prometheus
+  - Grafana
+  - Alertmanager
+  skills: *id011
+  free_tier:
+    fit: partial
+    notes: GKE free-tier credit covers one cluster's management fee; nodes are billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/gcp/11-prometheus-grafana-alertmanager
+- id: gcp-12
+  cloud: gcp
+  number: 12
+  title: Centralized Logging with Elastic Stack
+  difficulty: advanced
+  build_hours: 6
+  depends_on:
+  - gcp-08
+  services:
+  - GKE
+  - Elasticsearch (ECK)
+  - Fluent Bit
+  - Persistent Disk
+  skills: *id012
+  free_tier:
+    fit: 'no'
+    notes: Elasticsearch needs large nodes
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/gcp/12-centralized-logging-elastic
+- id: gcp-13
+  cloud: gcp
+  number: 13
+  title: Distributed Tracing
+  difficulty: advanced
+  build_hours: 5
+  depends_on:
+  - gcp-11
+  services:
+  - GKE
+  - OpenTelemetry Collector
+  - Jaeger
+  skills: *id013
+  free_tier:
+    fit: partial
+    notes: GKE free-tier credit covers one cluster's management fee; nodes are billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/gcp/13-distributed-tracing
+- id: gcp-14
+  cloud: gcp
+  number: 14
+  title: SRE Failure and Recovery Lab
+  difficulty: advanced
+  build_hours: 6
+  depends_on:
+  - gcp-11
+  - gcp-12
+  services:
+  - GKE
+  - Cloud Monitoring
+  - Chaos Mesh
+  skills: *id014
+  free_tier:
+    fit: partial
+    notes: GKE free-tier credit covers one cluster's management fee; nodes are billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/gcp/14-sre-failure-recovery-lab
+- id: gcp-15
+  cloud: gcp
+  number: 15
+  title: Production-Inspired DevOps/SRE Capstone
+  difficulty: advanced
+  build_hours: 12
+  depends_on:
+  - gcp-09
+  - gcp-10
+  - gcp-11
+  - gcp-12
+  - gcp-13
+  - gcp-14
+  services:
+  - GKE
+  - Cloud SQL
+  - Secret Manager
+  - Cloud Load Balancing
+  skills: *id015
+  free_tier:
+    fit: 'no'
+    notes: Cloud SQL, load balancing and nodes are billed
+  status: planned
+  validation:
+    static: not-run
+    local: not-run
+    deployment: not-tested
+  planned_path: projects/gcp/15-devops-sre-capstone

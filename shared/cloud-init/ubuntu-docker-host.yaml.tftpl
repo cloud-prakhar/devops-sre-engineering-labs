@@ -1,0 +1,42 @@
+#cloud-config
+# Ubuntu 24.04 + Docker Engine from Docker's official apt repository.
+# Shared by AWS 02 and AWS 03. Template variables:
+#   daemon_json  base64 of docker-daemon.json
+#   lab_name     label used in the final message
+package_update: true
+package_upgrade: true
+packages:
+  - ca-certificates
+  - curl
+  - ufw
+  - unattended-upgrades
+  - jq
+
+write_files:
+  - path: /etc/docker/daemon.json
+    encoding: b64
+    content: ${daemon_json}
+    permissions: "0644"
+
+runcmd:
+  # 1 GiB swap: a t3.micro has 1 GiB RAM; pip and image builds can exceed it.
+  - [sh, -c, "fallocate -l 1G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile && echo '/swapfile none swap sw 0 0' >> /etc/fstab"]
+  - [sh, -c, "sysctl -w vm.swappiness=10 && echo 'vm.swappiness=10' > /etc/sysctl.d/90-lab-swap.conf"]
+  # Docker apt repository (signed). See https://docs.docker.com/engine/install/ubuntu/
+  - [install, -m, "0755", -d, /etc/apt/keyrings]
+  - [curl, -fsSL, https://download.docker.com/linux/ubuntu/gpg, -o, /etc/apt/keyrings/docker.asc]
+  - [chmod, a+r, /etc/apt/keyrings/docker.asc]
+  - [sh, -c, '. /etc/os-release && printf "Types: deb\nURIs: https://download.docker.com/linux/ubuntu\nSuites: %s\nComponents: stable\nSigned-By: /etc/apt/keyrings/docker.asc\n" "$VERSION_CODENAME" > /etc/apt/sources.list.d/docker.sources']
+  - [apt-get, update]
+  - [apt-get, install, -y, docker-ce, docker-ce-cli, containerd.io, docker-buildx-plugin, docker-compose-plugin]
+  # Membership in "docker" is root-equivalent; granted because the labs drive the daemon
+  # remotely over SSH (see projects/aws/02-dockerized-app-on-vm/docs/adr/0001-*).
+  - [usermod, -aG, docker, ubuntu]
+  - [systemctl, enable, --now, docker]
+  # ufw only allows SSH. Docker-published ports bypass ufw (AWS 02 exercise 4 demonstrates this).
+  - [ufw, default, deny, incoming]
+  - [ufw, allow, OpenSSH]
+  - [ufw, --force, enable]
+  - [systemctl, enable, --now, unattended-upgrades]
+
+final_message: "${lab_name} cloud-init finished after $UPTIME seconds"

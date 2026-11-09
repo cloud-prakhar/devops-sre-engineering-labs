@@ -1,0 +1,113 @@
+# Taskboard multi-service stack (AWS 03).
+#
+#   internet ─▶ proxy (TLS) ─┬─▶ frontend   [network: edge]
+#                            └─▶ api ──────▶ db   [network: backend, internal]
+#
+# Only the proxy publishes ports. The database is on an internal network with no route to the
+# internet and no published port. Secrets are files, never environment variables.
+name: taskboard
+
+x-hardening: &hardening
+  restart: unless-stopped
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=16m
+
+services:
+  proxy:
+    <<: *hardening
+    build: ./proxy
+    image: taskboard-proxy:${APP_VERSION:-dev}
+    ports:
+      - "${HTTP_PORT:-80}:8080"
+      - "${HTTPS_PORT:-443}:8443"
+    environment:
+      TLS_SAN: ${TLS_SAN:-DNS:localhost,IP:127.0.0.1}
+    volumes:
+      - tls-certs:/etc/nginx/certs
+    networks: [edge]
+    depends_on:
+      frontend: { condition: service_healthy }
+      api: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+    deploy:
+      resources:
+        limits: { cpus: "0.25", memory: 64m, pids: 64 }
+
+  frontend:
+    <<: *hardening
+    build: ${TASKBOARD_SRC:-../../../../shared/sample-apps/taskboard}/frontend
+    image: taskboard-frontend:${APP_VERSION:-dev}
+    networks: [edge]
+    deploy:
+      resources:
+        limits: { cpus: "0.25", memory: 32m, pids: 32 }
+
+  api:
+    <<: *hardening
+    build:
+      context: ${TASKBOARD_SRC:-../../../../shared/sample-apps/taskboard}/api
+      args:
+        APP_VERSION: ${APP_VERSION:-dev}
+    image: taskboard-api:${APP_VERSION:-dev}
+    environment:
+      DATABASE_URL: postgresql://taskboard@db:5432/taskboard
+      DATABASE_PASSWORD_FILE: /run/secrets/db_password
+      DB_CONNECT_TIMEOUT: "3"
+    secrets: [db_password]
+    networks: [edge, backend]
+    depends_on:
+      # restart: true -> Compose restarts the API when the database is restarted by Compose.
+      db: { condition: service_healthy, restart: true }
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 256m, pids: 128 }
+
+  db:
+    <<: *hardening
+    image: postgres:17-alpine
+    # Run directly as the image's postgres user (UID 70): the entrypoint then needs no root
+    # privileges, so every capability can be dropped.
+    user: "70:70"
+    environment:
+      POSTGRES_USER: taskboard
+      POSTGRES_DB: taskboard
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    secrets: [db_password]
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+      - /var/run/postgresql:rw,noexec,nosuid,size=1m,uid=70,gid=70,mode=0775
+    shm_size: 64m
+    networks: [backend]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "taskboard", "-d", "taskboard"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+    stop_grace_period: 30s
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 256m, pids: 128 }
+
+networks:
+  edge: {}
+  backend:
+    internal: true
+
+volumes:
+  pg-data: {}
+  tls-certs: {}
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt

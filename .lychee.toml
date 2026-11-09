@@ -1,0 +1,10 @@
+# External link checking (manually triggered workflow). Internal links are checked by scripts/check-links.py.
+max_retries = 3
+timeout = 20
+accept = [200, 206, 429]
+exclude_path = ["node_modules", "docs/templates"]
+exclude = [
+  "^https?://localhost",
+  "^https?://127\\.0\\.0\\.1",
+  "^https://calculator\\.aws",
+]

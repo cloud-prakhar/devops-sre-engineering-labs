@@ -1,0 +1,7 @@
+// Apply security updates daily. Reboots stay manual in the lab so you can practise
+// checking /var/run/reboot-required and scheduling the reboot yourself.
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+APT::Periodic::AutocleanInterval "7";
+Unattended-Upgrade::Automatic-Reboot "false";
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";

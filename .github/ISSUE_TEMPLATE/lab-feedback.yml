@@ -1,0 +1,28 @@
+name: Lab problem or feedback
+description: A step failed, an explanation is wrong, or something is unclear
+labels: [lab-feedback]
+body:
+  - type: input
+    id: project
+    attributes:
+      label: Project ID
+      description: From catalog/projects.yaml, e.g. aws-02
+    validations: { required: true }
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options: [Step fails, Wrong or unclear explanation, Diagram problem, Cost estimate wrong, Security concern, Other]
+    validations: { required: true }
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened and what you expected
+      description: Include the exact command and its output. Remove account IDs, IPs and secrets.
+      render: text
+    validations: { required: true }
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: terraform version, docker version, OS, region

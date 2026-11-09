@@ -1,0 +1,25 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }
+    groups:
+      actions: { patterns: ["*"] }
+  - package-ecosystem: pip
+    directory: /shared/sample-apps/taskboard/api
+    schedule: { interval: weekly }
+  - package-ecosystem: docker
+    directories:
+      - /shared/sample-apps/taskboard/api
+      - /shared/sample-apps/taskboard/frontend
+      - /projects/aws/03-multi-service-docker-app/stack/proxy
+    schedule: { interval: weekly }
+  - package-ecosystem: terraform
+    directories:
+      - /projects/aws/01-linux-server-engineering/terraform
+      - /projects/aws/02-dockerized-app-on-vm/terraform
+      - /projects/aws/03-multi-service-docker-app/terraform
+    schedule: { interval: weekly }
+  - package-ecosystem: npm
+    directory: /scripts/mermaid
+    schedule: { interval: monthly }

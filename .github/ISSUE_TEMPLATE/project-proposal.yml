@@ -1,0 +1,20 @@
+name: Project or content proposal
+description: Propose a new lab, troubleshooting scenario or interview question
+labels: [proposal]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Real-world problem it teaches
+    validations: { required: true }
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Cloud(s), services, what gets deployed, estimated cost and free-tier fit
+    validations: { required: true }
+  - type: textarea
+    id: validation
+    attributes:
+      label: How it would be verified
+      description: What verify.sh would check (including negative checks)
