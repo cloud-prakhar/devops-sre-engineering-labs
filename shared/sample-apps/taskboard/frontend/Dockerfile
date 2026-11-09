@@ -1,5 +1,5 @@
 # Taskboard frontend: static files served by unprivileged NGINX.
-FROM nginxinc/nginx-unprivileged:1.28-alpine
+FROM nginxinc/nginx-unprivileged:1.31-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY site/ /usr/share/nginx/html/
 # The base image already runs as nginx (UID 101); stating it keeps that explicit and auditable.
