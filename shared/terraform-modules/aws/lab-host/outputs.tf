@@ -22,3 +22,8 @@ output "ami_id" {
   description = "Ubuntu 24.04 AMI used at creation time."
   value       = aws_instance.host.ami
 }
+
+output "role_name" {
+  description = "Instance role name."
+  value       = aws_iam_role.host.name
+}

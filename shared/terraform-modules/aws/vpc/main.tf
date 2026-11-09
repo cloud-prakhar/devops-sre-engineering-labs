@@ -45,7 +45,7 @@ resource "aws_subnet" "public" {
   cidr_block              = local.public_cidrs[count.index]
   availability_zone       = local.azs[count.index]
   map_public_ip_on_launch = false
-  tags                    = { Name = "${var.name}-public-${local.azs[count.index]}", Tier = "public" }
+  tags                    = merge({ Name = "${var.name}-public-${local.azs[count.index]}", Tier = "public" }, var.public_subnet_tags)
 }
 
 resource "aws_subnet" "private" {
@@ -53,7 +53,7 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.this.id
   cidr_block        = local.private_cidrs[count.index]
   availability_zone = local.azs[count.index]
-  tags              = { Name = "${var.name}-private-${local.azs[count.index]}", Tier = "private" }
+  tags              = merge({ Name = "${var.name}-private-${local.azs[count.index]}", Tier = "private" }, var.private_subnet_tags)
 }
 
 resource "aws_route_table" "public" {

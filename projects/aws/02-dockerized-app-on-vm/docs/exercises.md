@@ -36,11 +36,13 @@ The `requirements.txt` change re-runs `pip install` (slow). Explain why the Dock
 
 ```bash
 docker image ls taskboard-api:dev --format '{{.Size}}'
-docker run --rm --entrypoint sh taskboard-api:dev -c 'command -v gcc pip || echo "no compiler, pip only in venv"'
+docker run --rm --entrypoint sh taskboard-api:dev -c 'command -v gcc || echo "no compiler"; python -c "import pip" 2>&1 | tail -n1'
 docker run --rm --entrypoint sh taskboard-api:dev -c 'ls /opt/venv/lib/python3.14/site-packages | head'
 ```
 
-**Expected:** ~160 MB final image. Build-stage artefacts (pip cache, wheels, build tools) are absent.
+**Expected:** ~150 MB final image. Build-stage artefacts (pip cache, wheels, build tools) are absent,
+and so is pip itself (`No module named 'pip'`): the Dockerfile uninstalls it because it is a build tool
+whose vendored libraries showed up as fixable HIGH vulnerabilities in the AWS 06 scan gate.
 Name one thing that *is* still in the image that an attacker could use (`sh`, `python`) and what a
 distroless image would change ([ADR-0002](adr/0002-python-slim-base-image.md)).
 

@@ -45,12 +45,26 @@ Being able to **draw the diagram from memory** is the best sign you understand t
 | Secrets / Terraform | [How does the database password get to the instances, and where can it leak?](../../projects/aws/05-highly-available-server-app/docs/interview.md#q5-advanced--how-does-the-database-password-get-to-the-instances-and-where-can-it-leak) | Advanced | AWS 05 |
 | AWS / incident | [Instances keep being replaced every few minutes and the service never stabilises. How do you debug it?](../../projects/aws/05-highly-available-server-app/docs/interview.md#q6-scenario--instances-keep-being-replaced-every-few-minutes-and-the-service-never-stabilises-how-do-you-debug-it) | Scenario | AWS 05 |
 | Architecture / security | [This design keeps app instances in public subnets. Defend it, then describe the production version.](../../projects/aws/05-highly-available-server-app/docs/interview.md#q7-advanced--this-design-keeps-app-instances-in-public-subnets-defend-it-then-describe-the-production-version) | Advanced | AWS 05 |
+| CI/CD | [What are the stages of a CI/CD pipeline for a containerised service, and why in that order?](../../projects/aws/06-secure-cicd-container-registry/docs/interview.md#q1-beginner--what-are-the-stages-of-a-cicd-pipeline-for-a-containerised-service-and-why-in-that-order) | Beginner | AWS 06 |
+| CI/CD / security | [How does GitHub Actions get AWS credentials without storing access keys?](../../projects/aws/06-secure-cicd-container-registry/docs/interview.md#q2-intermediate--how-does-github-actions-get-aws-credentials-without-storing-access-keys) | Intermediate | AWS 06 |
+| Supply chain | [Why deploy by digest instead of by tag?](../../projects/aws/06-secure-cicd-container-registry/docs/interview.md#q3-intermediate--why-deploy-by-digest-instead-of-by-tag) | Intermediate | AWS 06 |
+| Supply chain | [What do an SBOM and a provenance attestation give you that a vulnerability scan does not?](../../projects/aws/06-secure-cicd-container-registry/docs/interview.md#q4-advanced--what-do-an-sbom-and-a-provenance-attestation-give-you-that-a-vulnerability-scan-does-not) | Advanced | AWS 06 |
+| CI/CD / incident | [The vulnerability gate blocks an urgent fix. What do you do?](../../projects/aws/06-secure-cicd-container-registry/docs/interview.md#q5-scenario--the-vulnerability-gate-blocks-an-urgent-fix-what-do-you-do) | Scenario | AWS 06 |
+| Delivery / security | [Push-based deployment over SSH vs pull-based via an agent: which and why?](../../projects/aws/06-secure-cicd-container-registry/docs/interview.md#q6-advanced--push-based-deployment-over-ssh-vs-pull-based-via-an-agent-which-and-why) | Advanced | AWS 06 |
+| Supply chain / incident | [A pipeline was compromised and pushed a malicious image. How would you detect it, limit the damage and recover?](../../projects/aws/06-secure-cicd-container-registry/docs/interview.md#q7-scenario--a-pipeline-was-compromised-and-pushed-a-malicious-image-how-would-you-detect-it-limit-the-damage-and-recover) | Scenario | AWS 06 |
+| Kubernetes / EKS | [What does EKS manage for you, and what do you still own?](../../projects/aws/07-managed-kubernetes-foundations/docs/interview.md#q1-beginner--what-does-eks-manage-for-you-and-what-do-you-still-own) | Beginner | AWS 07 |
+| Kubernetes networking | [How do pods get IP addresses on EKS, and why can a t3.small only run 11 pods?](../../projects/aws/07-managed-kubernetes-foundations/docs/interview.md#q2-intermediate--how-do-pods-get-ip-addresses-on-eks-and-why-can-a-t3small-only-run-11-pods) | Intermediate | AWS 07 |
+| Kubernetes | [Walk through what happens between `kubectl apply -f deployment.yaml` and a Ready pod.](../../projects/aws/07-managed-kubernetes-foundations/docs/interview.md#q3-intermediate--walk-through-what-happens-between-kubectl-apply--f-deploymentyaml-and-a-ready-pod) | Intermediate | AWS 07 |
+| Kubernetes security | [How do you control who can do what in an EKS cluster?](../../projects/aws/07-managed-kubernetes-foundations/docs/interview.md#q4-advanced--how-do-you-control-who-can-do-what-in-an-eks-cluster) | Advanced | AWS 07 |
+| Kubernetes / IAM | [How should a pod get AWS permissions, and what is wrong with using the node role?](../../projects/aws/07-managed-kubernetes-foundations/docs/interview.md#q5-advanced--how-should-a-pod-get-aws-permissions-and-what-is-wrong-with-using-the-node-role) | Advanced | AWS 07 |
+| Kubernetes / incident | [Pods are stuck in `Pending` after a deployment scaled up. Diagnose it.](../../projects/aws/07-managed-kubernetes-foundations/docs/interview.md#q6-scenario--pods-are-stuck-in-pending-after-a-deployment-scaled-up-diagnose-it) | Scenario | AWS 07 |
+| Kubernetes / cost | [Your manager asks why the Kubernetes bill is higher than the old VMs. Break it down and cut it.](../../projects/aws/07-managed-kubernetes-foundations/docs/interview.md#q7-scenario--your-manager-asks-why-the-kubernetes-bill-is-higher-than-the-old-vms-break-it-down-and-cut-it) | Scenario | AWS 07 |
 
 ## By cloud
 
 | Cloud | Labs with questions | Count |
 |---|---|---|
-| AWS | 01–05 | 35 |
+| AWS | 01–07 | 49 |
 | Azure | — (planned) | 0 |
 | GCP | — (planned) | 0 |
 
@@ -61,10 +75,10 @@ groups, SSH builds vs ECR, VPC/NAT design, ALB + Auto Scaling, RDS secrets.
 
 | Level | Questions |
 |---|---|
-| Beginner | AWS 01 Q1 · AWS 02 Q1 · AWS 03 Q1 · AWS 04 Q1 · AWS 05 Q1 |
-| Intermediate | AWS 01 Q2, Q3 · AWS 02 Q2, Q3, Q5 · AWS 03 Q2, Q3, Q5 · AWS 04 Q2, Q3, Q4, Q5 · AWS 05 Q2, Q4 |
-| Advanced | AWS 01 Q4, Q7 · AWS 02 Q4, Q7 · AWS 03 Q4, Q7 · AWS 04 Q7 · AWS 05 Q3, Q5, Q7 |
-| Scenario | AWS 01 Q5, Q6 · AWS 02 Q6 · AWS 03 Q6 · AWS 04 Q6 · AWS 05 Q6 |
+| Beginner | AWS 01 Q1 · AWS 02 Q1 · AWS 03 Q1 · AWS 04 Q1 · AWS 05 Q1 · AWS 06 Q1 · AWS 07 Q1 |
+| Intermediate | AWS 01 Q2, Q3 · AWS 02 Q2, Q3, Q5 · AWS 03 Q2, Q3, Q5 · AWS 04 Q2, Q3, Q4, Q5 · AWS 05 Q2, Q4 · AWS 06 Q2, Q3 · AWS 07 Q2, Q3 |
+| Advanced | AWS 01 Q4, Q7 · AWS 02 Q4, Q7 · AWS 03 Q4, Q7 · AWS 04 Q7 · AWS 05 Q3, Q5, Q7 · AWS 06 Q4, Q6 · AWS 07 Q4, Q5 |
+| Scenario | AWS 01 Q5, Q6 · AWS 02 Q6 · AWS 03 Q6 · AWS 04 Q6 · AWS 05 Q6 · AWS 06 Q5, Q7 · AWS 07 Q6, Q7 |
 
 ## Scenario drills (incident-style)
 
@@ -80,5 +94,9 @@ groups, SSH builds vs ECR, VPC/NAT design, ALB + Auto Scaling, RDS secrets.
 | Instance loss behind a load balancer | AWS 05 `failure-drill.sh terminate` + `probe.sh` |
 | Database outage with readiness health checks (fail open) | AWS 05 exercise 7, Q3 |
 | Replacement loop in an Auto Scaling group | AWS 05 Q6, troubleshooting #5 |
+| Vulnerability gate blocks an urgent release | AWS 06 exercise 3, Q5 |
+| Compromised pipeline pushed an image | AWS 06 Q7, exercise 7 (provenance) |
+| Pods stuck Pending (Too many pods) | AWS 07 exercise 2, Q6 |
+| Node lost: drain, reschedule, replace | AWS 07 exercise 9 |
 
 Roles and study plans: [learning paths → interview preparation](../learning-paths/README.md#interview-preparation).

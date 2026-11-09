@@ -22,6 +22,9 @@ repeating the material.
 | Cloud networking | [AWS VPC design: subnets, routing, NAT, endpoints](aws-vpc-design.md) | AWS 04–05 |
 | IaC | [Terraform remote state and locking](terraform-state-and-locking.md) | AWS 04–05 |
 | Reliability | [Load balancing, health checks and autoscaling](load-balancing-and-autoscaling.md) | AWS 05 |
+| Delivery | [CI/CD supply-chain security: OIDC, digests, scanning, SBOM, provenance](cicd-supply-chain-security.md) | AWS 06–07 |
+| Kubernetes | [Kubernetes core concepts](kubernetes-core-concepts.md) | AWS 07 |
+| Kubernetes | [EKS access and identity: access entries, RBAC, Pod Identity](eks-access-and-identity.md) | AWS 07 |
 
-New guides are added together with the first lab that needs them (Kubernetes, observability and SRE
-guides arrive with AWS 07, 11 and 14).
+New guides are added together with the first lab that needs them (observability and SRE guides arrive
+with AWS 11 and 14).

@@ -1,0 +1,10 @@
+# Pod Security Admission: the "restricted" standard is enforced, so non-root, no privilege escalation,
+# dropped capabilities and a seccomp profile are mandatory for every pod in this namespace.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: taskboard
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/warn: restricted

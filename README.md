@@ -5,7 +5,7 @@ Azure and Google Cloud**. Every lab is deployable code plus the material to unde
 Mermaid architectures, Architecture Decision Records, cost estimates, troubleshooting playbooks,
 failure drills and interview preparation.
 
-> **Status (2026-11-09):** 5 of 45 projects implemented (AWS 01–05). They pass static checks (and local
+> **Status (2026-11-09):** 7 of 45 projects implemented (AWS 01–07). They pass static checks (and local
 > container tests where applicable); **none has been deployed to a cloud account yet**. See the
 > [implementation tracker](docs/progress/implementation-tracker.md) for exact per-project status.
 
@@ -65,8 +65,8 @@ cloud in [catalog/projects.yaml](catalog/projects.yaml) and explained in
 | 03 | Multi-Service Docker Application | Beginner | 4 h | [✅ implemented](projects/aws/03-multi-service-docker-app/) · free tier | planned | planned |
 | 04 | Terraform Networking Foundations | Intermediate | 5 h | [✅ implemented](projects/aws/04-terraform-networking-foundations/) · free tier (default) | planned | planned |
 | 05 | Highly Available Server Application | Intermediate | 5 h | [✅ implemented](projects/aws/05-highly-available-server-app/) · partial free tier | planned | planned |
-| 06 | Secure CI/CD and Container Registry | Intermediate | 5 h | planned | planned | planned |
-| 07 | Managed Kubernetes Foundations | Intermediate | 6 h | planned | planned | planned |
+| 06 | Secure CI/CD and Container Registry | Intermediate | 5 h | [✅ implemented](projects/aws/06-secure-cicd-container-registry/) · free tier | planned | planned |
+| 07 | Managed Kubernetes Foundations | Intermediate | 6 h | [✅ implemented](projects/aws/07-managed-kubernetes-foundations/) · **billed** (EKS) | planned | planned |
 | 08 | Kubernetes Networking and Autoscaling | Intermediate | 6 h | planned | planned | planned |
 | 09 | Helm and Argo CD GitOps | Advanced | 6 h | planned | planned | planned |
 | 10 | Stateful Kubernetes Workloads | Advanced | 6 h | planned | planned | planned |
@@ -125,7 +125,7 @@ Plus a cloud account you control. Use a **dedicated lab account**, not one that 
 
 ```bash
 scripts/validate.sh              # everything that can run locally (uses Docker for missing linters)
-scripts/validate.sh terraform    # one group: terraform | cloudinit | shell | docker | yaml | compose | mermaid | links | catalog | app | secrets
+scripts/validate.sh terraform    # one group: terraform | cloudinit | shell | docker | yaml | workflows | kubernetes | compose | mermaid | links | catalog | app | secrets
 ```
 
 The same checks run in [GitHub Actions](.github/workflows/validate.yml) with read-only permissions.

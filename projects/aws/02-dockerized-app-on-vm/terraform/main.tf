@@ -8,8 +8,10 @@ locals {
 locals {
   # Rendered cloud-init document (checked by scripts/validate.sh cloudinit).
   user_data = templatefile("${path.module}/../../../../shared/cloud-init/ubuntu-docker-host.yaml.tftpl", {
-    daemon_json = filebase64("${path.module}/../../../../shared/cloud-init/docker-daemon.json")
-    lab_name    = local.name
+    daemon_json  = filebase64("${path.module}/../../../../shared/cloud-init/docker-daemon.json")
+    lab_name     = local.name
+    extra_files  = {}
+    extra_runcmd = []
   })
 }
 

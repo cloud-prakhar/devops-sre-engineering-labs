@@ -1,0 +1,2 @@
+# Overlay written by scripts/deploy-workloads.sh (contains the image digest of the current deploy)
+.generated/

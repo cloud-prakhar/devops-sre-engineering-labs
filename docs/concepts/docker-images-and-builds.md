@@ -26,7 +26,7 @@ flowchart TB
         r4 --> r5[USER 10001 · HEALTHCHECK · CMD]:::sec
     end
     b3 -. only the venv crosses .-> r3
-    r5 --> img[(taskboard-api:tag<br/>~160 MB)]:::data
+    r5 --> img[(taskboard-api:tag<br/>~150 MB, no pip)]:::data
     classDef data fill:#fef9c3,stroke:#a16207,color:#713f12
     classDef app fill:#dcfce7,stroke:#15803d,color:#14532d
     classDef sec fill:#ffedd5,stroke:#c2410c,color:#7c2d12

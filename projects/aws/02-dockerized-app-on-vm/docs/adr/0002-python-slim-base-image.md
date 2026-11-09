@@ -22,7 +22,7 @@ small, patchable, debuggable by learners, and free of build tools at runtime.
 
 | Option | Size (approx.) | Pros | Cons |
 |---|---|---|---|
-| **A. `python:3.14-slim-trixie`, multi-stage** | ~160 MB | glibc → prebuilt manylinux wheels (`psycopg[binary]`, `pydantic-core`); shell for learning; Debian security updates | Contains `sh`, `apt`, and Python; more packages to scan than distroless |
+| **A. `python:3.14-slim-trixie`, multi-stage** | ~150 MB | glibc → prebuilt manylinux wheels (`psycopg[binary]`, `pydantic-core`); shell for learning; Debian security updates | Contains `sh`, `apt`, and Python; more packages to scan than distroless |
 | B. `python:3.14-alpine` | ~80 MB | Smaller | musl libc: some wheels must compile from source; DNS and locale differences surprise learners |
 | C. Distroless (`gcr.io/distroless/python3`) | ~70 MB | No shell or package manager; fewest CVEs | Python version tied to the distroless Debian release; no shell makes the debugging exercises impossible |
 | D. Single-stage `python:3.14` | ~1 GB | Simplest | Ships compilers and headers; slow pulls; large CVE count |
@@ -30,12 +30,13 @@ small, patchable, debuggable by learners, and free of build tools at runtime.
 ## Decision
 
 Option A, built in two stages: the build stage creates a virtualenv with all dependencies; the runtime
-stage copies only `/opt/venv` and the app, creates UID/GID 10001, and declares a `HEALTHCHECK` that uses
-Python's `urllib` (no curl needed).
+stage copies only `/opt/venv` (with pip uninstalled) and the app, applies pending Debian security
+updates, removes the base image's pip and ensurepip wheels, creates UID/GID 10001, and declares a
+`HEALTHCHECK` that uses Python's `urllib` (no curl needed).
 
 ## Consequences
 
-**Positive:** fast installs from wheels; ~160 MB image; non-root with predictable volume ownership;
+**Positive:** fast installs from wheels; ~150 MB image; non-root with predictable volume ownership;
 learners can inspect the container.
 
 **Negative:** a shell and Python interpreter remain — useful to an attacker after an RCE. Compensated by

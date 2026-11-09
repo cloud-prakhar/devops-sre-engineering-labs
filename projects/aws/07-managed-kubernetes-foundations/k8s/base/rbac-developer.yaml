@@ -1,0 +1,34 @@
+# Kubernetes authorisation for the IAM role mapped (via an EKS access entry) to group lab07-developers:
+# read workloads and logs, port-forward, restart deployments — in this namespace only.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: developer
+  namespace: taskboard
+rules:
+  - apiGroups: [""]
+    resources: [pods, pods/log, services, configmaps, events]
+    verbs: [get, list, watch]
+  - apiGroups: [""]
+    resources: [pods/portforward]
+    verbs: [create]
+  - apiGroups: [apps]
+    resources: [deployments, replicasets]
+    verbs: [get, list, watch]
+  - apiGroups: [apps]
+    resources: [deployments]
+    verbs: [patch]          # allows "kubectl rollout restart", not create/delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: developers
+  namespace: taskboard
+subjects:
+  - kind: Group
+    name: lab07-developers
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: developer
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,5 @@
+# EKS-only resources (need AWS: Pod Identity). Not used by local schema checks of k8s/base alone.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - pod-identity-demo.yaml

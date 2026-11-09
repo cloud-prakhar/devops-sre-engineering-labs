@@ -22,6 +22,8 @@ updates:
       - /projects/aws/04-terraform-networking-foundations/terraform/bootstrap
       - /projects/aws/04-terraform-networking-foundations/terraform/network
       - /projects/aws/05-highly-available-server-app/terraform
+      - /projects/aws/06-secure-cicd-container-registry/terraform
+      - /projects/aws/07-managed-kubernetes-foundations/terraform
     schedule: { interval: weekly }
   - package-ecosystem: npm
     directory: /scripts/mermaid

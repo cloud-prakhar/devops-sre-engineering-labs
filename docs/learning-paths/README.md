@@ -36,7 +36,7 @@ Linux → Networking → Docker → Terraform → Basic cloud → Kubernetes
 | 3 | [AWS 02 Dockerized app](../../projects/aws/02-dockerized-app-on-vm/) | [Images](../concepts/docker-images-and-builds.md), [container security](../concepts/container-security.md) | Build and run hardened containers |
 | 4 | [AWS 03 Multi-service app](../../projects/aws/03-multi-service-docker-app/) | [Compose](../concepts/docker-compose.md), [reverse proxy & TLS](../concepts/reverse-proxy-and-tls.md) | Run a multi-tier stack with TLS and backups |
 | 5 | [AWS 04 Terraform networking](../../projects/aws/04-terraform-networking-foundations/) | [Terraform fundamentals](../concepts/terraform-fundamentals.md), [state & locking](../concepts/terraform-state-and-locking.md), [VPC design](../concepts/aws-vpc-design.md) | Reusable network foundation with remote state |
-| 6 | AWS 07 Managed Kubernetes *(planned)* | — | First cluster |
+| 6 | [AWS 07 Managed Kubernetes](../../projects/aws/07-managed-kubernetes-foundations/) | [Kubernetes core concepts](../concepts/kubernetes-core-concepts.md), [EKS access & identity](../concepts/eks-access-and-identity.md) | First cluster |
 
 ## Intermediate
 
@@ -46,8 +46,8 @@ Multi-tier architecture → CI/CD → Kubernetes → Helm → GitOps → Monitor
 |---|---|---|
 | 1 | [AWS 03](../../projects/aws/03-multi-service-docker-app/) — attempts 3–5 of the repeat practice | Design tiers and isolation yourself |
 | 2 | [AWS 05 Highly available server app](../../projects/aws/05-highly-available-server-app/) | Load balancing, autoscaling, [concept guide](../concepts/load-balancing-and-autoscaling.md) |
-| 3 | AWS 06 Secure CI/CD *(planned)* | OIDC, scanning, provenance |
-| 4 | AWS 07–08 Kubernetes *(planned)* | Cluster, probes, HPA, NetworkPolicy |
+| 3 | [AWS 06 Secure CI/CD](../../projects/aws/06-secure-cicd-container-registry/) | OIDC, scanning, provenance — [guide](../concepts/cicd-supply-chain-security.md) |
+| 4 | [AWS 07](../../projects/aws/07-managed-kubernetes-foundations/) + AWS 08 *(planned)* | Cluster, probes, RBAC; then HPA, NetworkPolicy |
 | 5 | AWS 09 Helm + Argo CD *(planned)* | GitOps delivery |
 | 6 | AWS 11 Prometheus/Grafana *(planned)* | SLIs, alerts |
 

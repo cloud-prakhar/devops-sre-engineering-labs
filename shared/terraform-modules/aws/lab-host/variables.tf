@@ -14,7 +14,7 @@ variable "subnet_id" {
 }
 
 variable "instance_type" {
-  description = "EC2 type. Restricted to types AWS lists as free-tier eligible (check your account's plan)."
+  description = "EC2 type. Restricted to types AWS lists as free-tier eligible; shared/scripts/aws-preflight.sh prints the list for your account (t2.micro only on some legacy accounts)."
   type        = string
   default     = "t3.micro"
 
@@ -85,4 +85,10 @@ variable "app_ingress" {
 variable "user_data_base64" {
   description = "Base64-encoded cloud-init user data."
   type        = string
+}
+
+variable "extra_policy_json" {
+  description = "Optional inline IAM policy for the instance role (least privilege for the lab's needs, e.g. ECR pull)."
+  type        = string
+  default     = null
 }

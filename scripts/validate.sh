@@ -4,7 +4,7 @@
 #
 #   scripts/validate.sh                 all groups
 #   scripts/validate.sh terraform shell one or more groups:
-#     terraform cloudinit shell docker yaml compose mermaid links catalog app secrets
+#     terraform cloudinit shell docker yaml workflows kubernetes compose mermaid links catalog app secrets
 set -uo pipefail
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$ROOT" || exit 1
@@ -14,6 +14,10 @@ SHELLCHECK_IMAGE=koalaman/shellcheck:v0.11.0
 TFLINT_IMAGE=ghcr.io/terraform-linters/tflint:v0.66.0
 TRIVY_IMAGE=aquasec/trivy:0.76.2
 GITLEAKS_IMAGE=zricethezav/gitleaks:v8.30.1
+ACTIONLINT_IMAGE=rhysd/actionlint:1.7.12
+KUBECONFORM_IMAGE=ghcr.io/yannh/kubeconform:v0.8.0
+KUBECTL_IMAGE=registry.k8s.io/kubectl:v1.37.0
+K8S_SCHEMA_VERSION=1.37.0
 PYTHON_IMAGE=python:3.14-slim-trixie
 NODE_IMAGE=node:26-alpine
 
@@ -78,6 +82,33 @@ run_yaml() {
   if have yamllint; then yamllint -s . || ok=1
   else dockerized --entrypoint sh "$PYTHON_IMAGE" -c 'pip -q install yamllint==1.38.0 && yamllint -s .' || ok=1; fi
   record yaml "$ok"
+}
+
+run_workflows() {
+  section "workflows: actionlint (GitHub Actions syntax, expressions, embedded shell)"
+  local ok=0
+  if have actionlint; then actionlint -color=false || ok=1
+  else dockerized "$ACTIONLINT_IMAGE" -color=false || ok=1; fi
+  [[ $ok -eq 0 ]] && echo "$(find .github/workflows -name '*.yml' | wc -l) workflow(s) clean"
+  record workflows "$ok"
+}
+
+run_kubernetes() {
+  section "kubernetes: kustomize build + kubeconform -strict (Kubernetes $K8S_SCHEMA_VERSION schemas)"
+  local ok=0 k dir out
+  out=$(mktemp -d)
+  while read -r k; do
+    dir=$(dirname "$k")
+    local name; name=$(echo "$dir" | tr '/' '_')
+    if have kubectl; then kubectl kustomize "$dir" > "$out/$name.yaml" || ok=1
+    else docker run --rm -v "$ROOT:/repo:ro" -w /repo "$KUBECTL_IMAGE" kustomize "$dir" > "$out/$name.yaml" || ok=1; fi
+    echo "rendered: $dir"
+  done < <(find projects -name kustomization.yaml -not -path '*/.generated/*' | sort)
+  if ls "$out"/*.yaml >/dev/null 2>&1; then
+    docker run --rm -v "$out:/m:ro" "$KUBECONFORM_IMAGE" -strict -summary -kubernetes-version "$K8S_SCHEMA_VERSION" /m || ok=1
+  fi
+  rm -rf "$out"
+  record kubernetes "$ok"
 }
 
 run_compose() {
@@ -214,10 +245,10 @@ run_secrets() {
 }
 
 groups=("$@")
-[[ ${#groups[@]} -eq 0 ]] && groups=(terraform cloudinit shell docker yaml compose mermaid links catalog app secrets)
+[[ ${#groups[@]} -eq 0 ]] && groups=(terraform cloudinit shell docker yaml workflows kubernetes compose mermaid links catalog app secrets)
 for g in "${groups[@]}"; do
   case "$g" in
-    terraform|cloudinit|shell|docker|yaml|compose|mermaid|links|catalog|app|secrets) "run_$g" ;;
+    terraform|cloudinit|shell|docker|yaml|workflows|kubernetes|compose|mermaid|links|catalog|app|secrets) "run_$g" ;;
     *) echo "unknown group: $g"; exit 2 ;;
   esac
 done

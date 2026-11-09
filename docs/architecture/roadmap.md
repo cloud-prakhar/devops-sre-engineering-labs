@@ -39,6 +39,9 @@ flowchart LR
 | S3 state bucket with native locking | AWS 04 | AWS 05+ via `shared/scripts/tf-init-backend.sh` |
 | Hardened systemd service (`shared/linux-service`) | AWS 01 | AWS 05 instances |
 | Write-only secrets (ephemeral → `*_wo`) | AWS 05 | every later lab with credentials |
+| OIDC pipeline, ECR repository, digests + provenance | AWS 06 | AWS 07 deploys the AWS 06 digest; GitOps in AWS 09 |
+| EKS cluster (access entries, Pod Identity, add-ons) | AWS 07 | AWS 08–15 |
+| Hardened pod spec + `restricted` namespace | AWS 07 | every Kubernetes lab |
 | Docker host cloud-init | AWS 02 | AWS 03 |
 | Hardened container profile | AWS 02 | AWS 03 Compose anchor → Kubernetes `securityContext` in 08 |
 | Health-gated rollout + rollback | AWS 02 | ALB health checks (05), Kubernetes rolling updates (08), Argo CD (09) |

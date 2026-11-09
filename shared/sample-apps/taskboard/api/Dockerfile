@@ -10,7 +10,8 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_NO_CACHE_DIR=1
 # requirements.txt changes, even when application code changes.
 COPY requirements.txt .
 RUN python -m venv /opt/venv \
- && /opt/venv/bin/pip install --no-compile -r requirements.txt
+ && /opt/venv/bin/pip install --no-compile -r requirements.txt \
+ && /opt/venv/bin/pip uninstall --yes pip   # pip is a build tool: it must not ship in the runtime image
 
 FROM python:3.14-slim-trixie AS runtime
 ARG APP_VERSION=dev
@@ -21,8 +22,17 @@ ENV PATH="/opt/venv/bin:${PATH}" \
     PYTHONUNBUFFERED=1 \
     APP_VERSION=${APP_VERSION} \
     DATABASE_URL=sqlite:////data/taskboard.db
-# Fixed UID/GID so volume ownership is predictable across hosts.
-RUN groupadd --system --gid 10001 app \
+# The base image's own pip (with vendored urllib3, msgpack, ...) and ensurepip wheels are not needed at
+# runtime; removing them removes their CVEs from every scan. Fixed UID/GID so volume ownership is
+# predictable across hosts.
+# Debian security fixes published after the base image was built are applied here, so the image does
+# not wait for an upstream rebuild (the vulnerability gate in AWS 06 fails on fixable HIGH/CRITICAL).
+RUN apt-get update \
+ && apt-get upgrade -y --no-install-recommends \
+ && rm -rf /var/lib/apt/lists/* \
+ && python -m pip uninstall --yes pip \
+ && rm -rf /usr/local/lib/python3.14/ensurepip \
+ && groupadd --system --gid 10001 app \
  && useradd --system --uid 10001 --gid app --no-create-home --shell /usr/sbin/nologin app \
  && mkdir -p /data && chown app:app /data
 COPY --from=build /opt/venv /opt/venv

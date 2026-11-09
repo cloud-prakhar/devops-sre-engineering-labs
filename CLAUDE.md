@@ -37,6 +37,8 @@ A multi-cloud DevOps/SRE learning platform: 15 themes × 3 clouds = 45 projects,
 | `shared/linux-service/` | Hardened `taskboard.service` + `install-taskboard.sh` (AWS 01 native install, AWS 05 instances) |
 | `shared/scripts/` | `lib.sh` (helpers), `aws-preflight.sh`, `aws-find-lab-resources.sh`, `tf-init-backend.sh` (S3 backend from AWS 04 bootstrap) |
 | `docs/concepts/` | Reusable concept guides (7-part structure) |
+| `.github/workflows/aws-06-delivery.yml` | AWS 06 pipeline (lives at repo level because GitHub only reads workflows there); release/deploy only on `workflow_dispatch` + `vars.AWS06_ENABLED == 'true'` + environment `aws-06-lab` |
+| `projects/aws/07-*/k8s/` | Kustomize bases (`base/`, `aws/`); `k8s/.generated/` is the git-ignored deploy overlay |
 | `scripts/` | `validate.sh`, `catalog.py`, `check-links.py`, `mermaid/` |
 
 ## Conventions that are easy to get wrong
@@ -60,13 +62,20 @@ A multi-cloud DevOps/SRE learning platform: 15 themes × 3 clouds = 45 projects,
   initialise with `shared/scripts/tf-init-backend.sh <stack-dir>`.
 - Secrets: generate with ephemeral resources and pass only to write-only arguments (`*_wo`); `verify.sh`
   asserts no secret is in state.
+- Images are deployed by digest only (`repo@sha256:…`) — AWS 06 deploy script and AWS 07
+  `deploy-workloads.sh` refuse tags. The shared API image ships without pip and applies Debian security
+  updates at build time so the trivy gate (fixable HIGH/CRITICAL) passes.
+- Kubernetes manifests must satisfy Pod Security `restricted` and pass `scripts/validate.sh kubernetes`;
+  kustomize forbids absolute paths, so generated overlays live inside the repo (git-ignored).
+- The environment blocks downloading and executing arbitrary binaries (e.g. the kind CLI); ask the owner
+  before relying on one.
 - `.github/workflows/external-links.yml` is **manual only** (`workflow_dispatch`) by owner decision — do not add a `schedule` trigger.
 
 ## Validation commands
 
 ```bash
 scripts/validate.sh                       # all groups; Docker fallbacks for missing linters
-scripts/validate.sh <group>               # terraform cloudinit shell docker yaml compose mermaid links catalog app secrets
+scripts/validate.sh <group>               # terraform cloudinit shell docker yaml workflows kubernetes compose mermaid links catalog app secrets
 python3 scripts/catalog.py validate       # structure of implemented projects + catalog consistency
 python3 scripts/catalog.py tracker --write
 projects/aws/02-dockerized-app-on-vm/scripts/local-test.sh
@@ -88,27 +97,30 @@ Owner instruction (2026-11-09): use the latest available versions, Python 3.14 f
 | Python deps | fastapi 0.162.2, uvicorn 0.54.0, psycopg[binary] 3.3.8, prometheus-client 0.26.0; dev: pytest 9.2.0, httpx2 2.16.0 |
 | Images | `python:3.14-slim-trixie`, `nginxinc/nginx-unprivileged:1.31-alpine`, `postgres:18-alpine` (data under `/var/lib/postgresql/18/docker`), `alpine:3.23`, `node:26-alpine` |
 | RDS | PostgreSQL major `18` (variable; fall back to 17 where not offered), db.t4g.micro |
-| Linters (Docker) | hadolint v2.15.1, shellcheck v0.11.0, trivy 0.76.2, gitleaks v8.30.1, tflint v0.66.0, lychee 0.24.2; yamllint 1.38.0 |
+| Linters (Docker) | hadolint v2.15.1, shellcheck v0.11.0, trivy 0.76.2, gitleaks v8.30.1, tflint v0.66.0, lychee 0.24.2, actionlint 1.7.12, kubeconform v0.8.0 (schemas 1.37.0); yamllint 1.38.0 |
+| Kubernetes | EKS 1.37 (default/newest standard support on 2026-11-09 per `aws eks describe-cluster-versions`); add-ons resolved with `aws_eks_addon_version most_recent`; kind v0.33.0 / `kindest/node:v1.37.0` is the candidate local cluster (not yet allowed in this environment) |
+| AWS 06 pipeline actions | configure-aws-credentials v6, amazon-ecr-login v2, attest-build-provenance v4, attest-sbom v4, upload-artifact v7; trivy run from its image, never a third-party action |
 | Mermaid validation | mermaid 12.3.0 + jsdom 31.0.0 (needs Node ≥ 22.22; `validate.sh` falls back to `node:26-alpine`) |
 | GitHub Actions | checkout v7, setup-python v7, setup-node v7, cache v6, setup-terraform v4; Python 3.14, Node 26 |
 
 ## Continuing the roadmap
 
-Current state: Phase 0 done; AWS 01–05 implemented (static checks passed; AWS 02–03 local container
-tests passed; **none deployed**).
+Current state: Phase 0 done; AWS 01–07 implemented (static checks passed; AWS 02, 03, 06 local tests
+passed; **none deployed**). Read-only AWS checks done on 2026-11-09: RDS PostgreSQL 18 (up to 18.6) is
+orderable on db.t4g.micro in us-east-1; this account's free-tier-eligible types are t3.micro, t3.small,
+t4g.micro, t4g.small, t8i.micro, t8i.small, c7i-flex.large, m7i-flex.large (no t2.micro).
 
 Next steps, in order:
 
-1. With the owner's approval, deploy-test AWS 01–05 (`apply` → `deploy.sh`/boot → `verify.sh` →
+1. With the owner's approval, deploy-test AWS 01–07 (`apply` → `deploy.sh`/boot → `verify.sh` →
    `destroy`), fix what breaks, record `deployment_record`s. Highest-risk untested parts: deadsnakes
-   PPA via cloud-init, RDS PostgreSQL 18 availability, the AWS 05 boot within the 300 s grace period,
-   NAT instance masquerading (AWS 04).
-2. AWS 06 Secure CI/CD + ECR: GitHub Actions with OIDC (no static keys), test → trivy scan → build →
-   push to ECR (lifecycle policy, immutable tags, scan on push) → deploy by digest. Reuse the AWS 04
-   bootstrap `state_access_policy_json` for a Terraform plan job. Deploy target: AWS 05's ASG (switch
-   user data from source install to `docker run <ecr image@digest>`, then instance refresh) — this
-   also removes the slow boot. Keep cloud-touching jobs `workflow_dispatch` / environment-gated.
-3. AWS 07–15 (EKS is never free: document cost per hour and keep sessions short).
+   PPA via cloud-init, AWS 05 boot within the 300 s grace period, NAT instance masquerading (AWS 04, 07),
+   the AWS 06 workflow on GitHub (OIDC trust, attestations push to ECR), EKS add-on ordering (AWS 07).
+2. AWS 08 Kubernetes networking and autoscaling on the AWS 07 cluster: AWS Load Balancer Controller via
+   Pod Identity (Helm), Ingress (ALB, billed — document cost), HPA on metrics-server, PDBs, NetworkPolicy
+   (VPC CNI network policy agent: `enableNetworkPolicy` in the vpc-cni add-on configuration), rolling
+   updates. Reuse `k8s/base` and extend with overlays rather than copying manifests.
+3. AWS 09–15.
 4. For each new lab: copy `docs/templates/project-readme.md`, meet the definition of done in
    CONTRIBUTING.md, update the catalog (`status`, `path`, `validation`), regenerate the tracker,
    add questions to `docs/interview-preparation/README.md`.

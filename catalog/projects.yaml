@@ -180,10 +180,14 @@ projects:
   build_hours: 5
   depends_on:
   - aws-02
+  - aws-04
   services:
   - ECR
-  - IAM OIDC provider
-  - GitHub Actions
+  - IAM OIDC provider (GitHub)
+  - Systems Manager Run Command
+  - EC2
+  - GitHub Actions + Environments
+  - GitHub artifact attestations
   skills: &id006
   - github-actions
   - oidc-federation
@@ -192,14 +196,14 @@ projects:
   - rollback
   - deployment-verification
   free_tier:
-    fit: partial
-    notes: ECR storage allowance is small; GitHub Actions minutes free on public repos
-  status: planned
+    fit: fits
+    notes: 1 x t3.micro deploy host; ECR storage < 500 MB; GitHub Actions free on public repositories
+  status: implemented
   validation:
-    static: not-run
-    local: not-run
+    static: passed
+    local: passed
     deployment: not-tested
-  planned_path: projects/aws/06-secure-cicd-container-registry
+  path: projects/aws/06-secure-cicd-container-registry
 - id: aws-07
   cloud: aws
   number: 7
@@ -208,11 +212,16 @@ projects:
   build_hours: 6
   depends_on:
   - aws-04
+  - aws-06
   services:
-  - EKS
-  - IAM
-  - VPC CNI
+  - EKS 1.37
+  - Managed node groups (AL2023)
+  - EKS managed add-ons
+  - EKS access entries
   - EKS Pod Identity
+  - VPC + NAT instance
+  - IAM
+  - SSM Parameter Store
   skills: &id007
   - control-plane
   - node-pools
@@ -223,13 +232,14 @@ projects:
   - managed-addons
   free_tier:
     fit: 'no'
-    notes: EKS control plane is billed per hour on every plan
-  status: planned
+    notes: EKS control plane is $0.10/h on every plan (~$0.49 per 3-hour session). Nodes use free-tier-eligible
+      t3.small (Free plan) and NAT uses a t3.micro instance
+  status: implemented
   validation:
-    static: not-run
-    local: not-run
+    static: passed
+    local: n/a
     deployment: not-tested
-  planned_path: projects/aws/07-managed-kubernetes-foundations
+  path: projects/aws/07-managed-kubernetes-foundations
 - id: aws-08
   cloud: aws
   number: 8

@@ -24,7 +24,7 @@ IAM, and must stay inside the free tier.
 |---|---|---|
 | **A. `DOCKER_HOST=ssh://` — build on the VM** | No registry; teaches the client/daemon split; nothing new to pay for | Builds use the VM's 1 GiB RAM; every host builds its own image; `ubuntu` must be in the `docker` group |
 | B. Push to Amazon ECR, pull on the VM | Production-like; one artefact for many hosts | Needs an instance role with ECR read, repository lifecycle policy, storage cost after the free allowance; covered properly in AWS 06 |
-| C. `docker save | ssh docker load` | No registry, builds on the faster laptop | Transfers the whole image each time (~160 MB), no layer reuse; CPU-architecture mismatch on Apple Silicon unless `--platform` |
+| C. `docker save | ssh docker load` | No registry, builds on the faster laptop | Transfers the whole image each time (~150 MB), no layer reuse; CPU-architecture mismatch on Apple Silicon unless `--platform` |
 | D. Docker Hub public repo | Free | Publishes the image publicly; pull rate limits; credentials management |
 
 ## Decision

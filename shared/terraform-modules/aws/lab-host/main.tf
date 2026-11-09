@@ -96,6 +96,13 @@ resource "aws_iam_role_policy_attachment" "ssm" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
+resource "aws_iam_role_policy" "extra" {
+  count  = var.extra_policy_json == null ? 0 : 1
+  name   = "${var.name}-extra"
+  role   = aws_iam_role.host.id
+  policy = var.extra_policy_json
+}
+
 resource "aws_iam_instance_profile" "host" {
   name = "${var.name}-host-profile"
   role = aws_iam_role.host.name

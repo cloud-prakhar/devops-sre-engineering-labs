@@ -3,6 +3,8 @@
 # Shared by AWS 02 and AWS 03. Template variables:
 #   daemon_json  base64 of docker-daemon.json
 #   lab_name     label used in the final message
+#   extra_files  map of path => base64 content (mode 0755), e.g. a deploy script (AWS 06); {} for none
+#   extra_runcmd list of commands run after Docker is installed; [] for none
 package_update: true
 package_upgrade: true
 packages:
@@ -17,6 +19,12 @@ write_files:
     encoding: b64
     content: ${daemon_json}
     permissions: "0644"
+%{ for path, content in extra_files ~}
+  - path: ${path}
+    encoding: b64
+    content: ${content}
+    permissions: "0755"
+%{ endfor ~}
 
 runcmd:
   # 1 GiB swap: a t3.micro has 1 GiB RAM; pip and image builds can exceed it.
@@ -38,5 +46,8 @@ runcmd:
   - [ufw, allow, OpenSSH]
   - [ufw, --force, enable]
   - [systemctl, enable, --now, unattended-upgrades]
+%{ for cmd in extra_runcmd ~}
+  - ${jsonencode(cmd)}
+%{ endfor ~}
 
 final_message: "${lab_name} cloud-init finished after $UPTIME seconds"

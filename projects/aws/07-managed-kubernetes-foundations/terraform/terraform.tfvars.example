@@ -1,0 +1,11 @@
+aws_region              = "us-east-1"
+owner                   = "your-name"
+cluster_name            = "lab07-eks"
+kubernetes_version      = "1.37"
+allowed_api_cidrs       = ["203.0.113.10/32"] # your IP: the only place the API endpoint is reachable from
+admin_principal_arn     = ""                  # empty = the identity running terraform
+nat_mode                = "instance"          # "gateway" is billed hourly
+node_instance_type      = "t3.small"
+node_capacity_type      = "ON_DEMAND"         # "SPOT" is cheaper but interruptible
+node_count              = 2
+control_plane_log_types = []

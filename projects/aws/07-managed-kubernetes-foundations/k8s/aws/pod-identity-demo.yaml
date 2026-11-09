@@ -1,0 +1,57 @@
+# Runs once and prints the SSM parameter it is allowed to read. The credentials come from EKS Pod
+# Identity because this pod uses ServiceAccount taskboard/pod-identity-demo (see pod-identity.tf).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pod-identity-demo
+  namespace: taskboard
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pod-identity-demo
+  namespace: taskboard
+spec:
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 3600
+  template:
+    spec:
+      serviceAccountName: pod-identity-demo
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: aws
+          image: public.ecr.aws/aws-cli/aws-cli:2.39.5
+          env:
+            - name: HOME
+              value: /tmp
+          command: [sh, -c]
+          args:
+            - aws sts get-caller-identity --query Arn --output text &&
+              aws ssm get-parameter --name "$PARAM" --query Parameter.Value --output text
+          envFrom:
+            - configMapRef:
+                name: pod-identity-demo
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 16Mi

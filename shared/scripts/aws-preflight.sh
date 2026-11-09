@@ -36,6 +36,15 @@ else
   fail "cannot call EC2 in $REGION (region disabled or no permission)"
 fi
 
+info "Free-tier eligible instance types for THIS account (they differ by account age and plan)"
+if types=$(aws ec2 describe-instance-types --region "$REGION" --filters Name=free-tier-eligible,Values=true \
+     --query 'InstanceTypes[].InstanceType' --output text 2>/dev/null) && [[ -n "$types" ]]; then
+  pass "$(tr '\t\n' '  ' <<<"$types")"
+  grep -qw t3.micro <<<"$types" || warn "t3.micro is not free-tier eligible here: set instance_type to one of the types above"
+else
+  warn "could not list free-tier eligible types"
+fi
+
 info "Detecting your public IP for security group rules"
 if my_ip=$(curl -fsS --max-time 5 https://checkip.amazonaws.com | tr -d '[:space:]'); then
   pass "public IP $my_ip -> use allowed_ssh_cidrs = [\"$my_ip/32\"]"
