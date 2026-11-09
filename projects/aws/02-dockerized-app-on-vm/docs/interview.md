@@ -51,7 +51,7 @@ manifest, dependency install, then application code.
 
 ```mermaid
 flowchart TB
-    b[FROM python:3.13-slim-trixie]:::data --> r[COPY requirements.txt]:::app
+    b[FROM python:3.14-slim-trixie]:::data --> r[COPY requirements.txt]:::app
     r --> p[RUN pip install -r requirements.txt<br/>slow, ~150 MB]:::app
     p --> c[COPY app ./app<br/>changes every commit]:::app
     c --> img[(image)]:::data

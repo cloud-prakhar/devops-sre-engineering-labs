@@ -37,6 +37,16 @@ resource "aws_vpc_security_group_ingress_rule" "ssh" {
   cidr_ipv4         = each.value
 }
 
+resource "aws_vpc_security_group_ingress_rule" "ssh_from_sg" {
+  for_each                     = toset(var.ssh_source_security_group_ids)
+  security_group_id            = aws_security_group.host.id
+  description                  = "SSH from a trusted security group"
+  ip_protocol                  = "tcp"
+  from_port                    = 22
+  to_port                      = 22
+  referenced_security_group_id = each.value
+}
+
 resource "aws_vpc_security_group_ingress_rule" "app" {
   for_each = {
     for rule in flatten([
@@ -98,7 +108,7 @@ resource "aws_instance" "host" {
   vpc_security_group_ids      = [aws_security_group.host.id]
   key_name                    = aws_key_pair.this.key_name
   iam_instance_profile        = aws_iam_instance_profile.host.name
-  associate_public_ip_address = true
+  associate_public_ip_address = var.associate_public_ip
   user_data_base64            = var.user_data_base64
   user_data_replace_on_change = true
   # Detailed (1-minute) monitoring is billed; basic 5-minute metrics are free.

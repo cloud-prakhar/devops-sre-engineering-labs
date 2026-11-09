@@ -74,4 +74,4 @@ aws ec2 describe-volumes --filters Name=tag:Repository,Values=devops-sre-enginee
 
 The root volume (with all images, the swap file and the `taskboard-data` volume) has
 `delete_on_termination = true`, so destroying the instance deletes the data too. Export anything you
-want to keep first: `ssh ubuntu@<ip> 'docker run --rm -v taskboard-data:/d alpine:3.22 tar -C /d -cz .' > taskboard-data.tgz`.
+want to keep first: `ssh ubuntu@<ip> 'docker run --rm -v taskboard-data:/d alpine:3.23 tar -C /d -cz .' > taskboard-data.tgz`.

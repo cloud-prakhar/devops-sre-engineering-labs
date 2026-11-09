@@ -5,8 +5,8 @@ Azure and Google Cloud**. Every lab is deployable code plus the material to unde
 Mermaid architectures, Architecture Decision Records, cost estimates, troubleshooting playbooks,
 failure drills and interview preparation.
 
-> **Status (2026-11-09):** 3 of 45 projects implemented (AWS 01–03). They pass static checks and local
-> container tests; **none has been deployed to a cloud account yet**. See the
+> **Status (2026-11-09):** 5 of 45 projects implemented (AWS 01–05). They pass static checks (and local
+> container tests where applicable); **none has been deployed to a cloud account yet**. See the
 > [implementation tracker](docs/progress/implementation-tracker.md) for exact per-project status.
 
 ## Who this is for
@@ -63,8 +63,8 @@ cloud in [catalog/projects.yaml](catalog/projects.yaml) and explained in
 | 01 | Linux Server Engineering | Beginner | 4 h | [✅ implemented](projects/aws/01-linux-server-engineering/) · free tier | planned | planned |
 | 02 | Dockerized Application on Cloud VM | Beginner | 3 h | [✅ implemented](projects/aws/02-dockerized-app-on-vm/) · free tier | planned | planned |
 | 03 | Multi-Service Docker Application | Beginner | 4 h | [✅ implemented](projects/aws/03-multi-service-docker-app/) · free tier | planned | planned |
-| 04 | Terraform Networking Foundations | Intermediate | 5 h | planned | planned | planned |
-| 05 | Highly Available Server Application | Intermediate | 5 h | planned | planned | planned |
+| 04 | Terraform Networking Foundations | Intermediate | 5 h | [✅ implemented](projects/aws/04-terraform-networking-foundations/) · free tier (default) | planned | planned |
+| 05 | Highly Available Server Application | Intermediate | 5 h | [✅ implemented](projects/aws/05-highly-available-server-app/) · partial free tier | planned | planned |
 | 06 | Secure CI/CD and Container Registry | Intermediate | 5 h | planned | planned | planned |
 | 07 | Managed Kubernetes Foundations | Intermediate | 6 h | planned | planned | planned |
 | 08 | Kubernetes Networking and Autoscaling | Intermediate | 6 h | planned | planned | planned |
@@ -91,12 +91,12 @@ Build times are first attempts including exercises. Rebuilds take 15–30 minute
 
 | Tool | Version used | Needed for |
 |---|---|---|
-| Terraform | ≥ 1.9 (tested 1.15) | All cloud labs |
+| Terraform | ≥ 1.9 (AWS 04: ≥ 1.10, AWS 05: ≥ 1.11); tested 1.15.6 and 1.17.1 | All cloud labs |
 | AWS CLI v2 | current | AWS labs, preflight, cleanup check |
 | Docker Engine + Compose v2 | Engine ≥ 25 (tested 29.1, Compose 5.1) | Labs 02+, local tests, linters |
 | OpenSSH client, rsync, curl, jq | any recent | Deploy and verify scripts |
-| Python 3.11+ | tested 3.12 | App tests, catalog validation |
-| Node.js 20+ | tested 20 | Mermaid validation (optional locally) |
+| Python | 3.14 for the app (tested 3.14.10); 3.10+ for repository scripts | App tests, catalog validation |
+| Node.js | ≥ 22.22 (CI: 26); otherwise `validate.sh` uses a `node:26-alpine` container | Mermaid validation |
 
 Plus a cloud account you control. Use a **dedicated lab account**, not one that hosts anything important.
 

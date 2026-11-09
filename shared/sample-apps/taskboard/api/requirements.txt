@@ -1,4 +1,4 @@
-# Runtime dependencies (pinned; resolved and tested 2026-11-09 on Python 3.13)
+# Runtime dependencies (pinned; resolved and tested 2026-11-09 on Python 3.14.10)
 fastapi==0.162.2
 uvicorn==0.54.0
 psycopg[binary]==3.3.8

@@ -41,12 +41,12 @@ flowchart LR
     subgraph aws[AWS · EC2 t3.micro · Ubuntu 24.04 + Docker]
         sg{{Security group<br/>22, 80, 443 from your /32}}:::sec
         subgraph edge[network: edge · bridge]
-            proxy[proxy · NGINX 1.28<br/>:8080 → 301, :8443 TLS 1.2/1.3<br/>rate limit 20 r/s]:::net
+            proxy[proxy · NGINX 1.31<br/>:8080 → 301, :8443 TLS 1.2/1.3<br/>rate limit 20 r/s]:::net
             fe[frontend · NGINX static<br/>:8080]:::app
             api[api · FastAPI<br/>:8000, UID 10001]:::app
         end
         subgraph backend[network: backend · internal, no internet]
-            db[(db · PostgreSQL 17<br/>:5432, UID 70)]:::data
+            db[(db · PostgreSQL 18<br/>:5432, UID 70)]:::data
         end
         certs[(volume tls-certs)]:::sec
         pg[(volume pg-data)]:::data
@@ -74,7 +74,7 @@ flowchart LR
 | `proxy` | TLS termination, HTTP→HTTPS redirect, routing, rate limiting, timeouts, JSON access logs | Host ports 80, 443 | [proxy/](stack/proxy/) |
 | `frontend` | Static HTML/JS/CSS with security headers | `edge` network only | [shared frontend](../../../shared/sample-apps/taskboard/frontend/) |
 | `api` | Business logic, `/healthz`, `/readyz`, `/metrics` | `edge` + `backend` | [shared API](../../../shared/sample-apps/taskboard/api/) |
-| `db` | PostgreSQL 17, data on `pg-data` | `backend` (internal) only | [compose.yaml](stack/compose.yaml) |
+| `db` | PostgreSQL 18, data on `pg-data` | `backend` (internal) only | [compose.yaml](stack/compose.yaml) |
 | `edge` network | Proxy ↔ frontend ↔ api | Bridge with internet egress | [compose.yaml](stack/compose.yaml) |
 | `backend` network | api ↔ db | `internal: true` — no gateway | [compose.yaml](stack/compose.yaml) |
 | Secret file | DB password, generated on the host | Mounted at `/run/secrets/db_password` | [init-secrets.sh](stack/init-secrets.sh) |
@@ -246,5 +246,5 @@ resources.
 - [Compose secrets](https://docs.docker.com/compose/how-tos/use-secrets/)
 - [NGINX `ngx_http_proxy_module`](https://nginx.org/en/docs/http/ngx_http_proxy_module.html)
 - [Mozilla SSL configuration guidance](https://ssl-config.mozilla.org/)
-- [PostgreSQL `pg_dump`](https://www.postgresql.org/docs/17/app-pgdump.html) and [`pg_restore`](https://www.postgresql.org/docs/17/app-pgrestore.html)
+- [PostgreSQL `pg_dump`](https://www.postgresql.org/docs/18/app-pgdump.html) and [`pg_restore`](https://www.postgresql.org/docs/18/app-pgrestore.html)
 - [Docker official image `postgres`](https://hub.docker.com/_/postgres)

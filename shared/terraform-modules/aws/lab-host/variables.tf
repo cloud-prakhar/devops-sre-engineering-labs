@@ -46,13 +46,30 @@ variable "ssh_public_key" {
 }
 
 variable "allowed_ssh_cidrs" {
-  description = "CIDRs allowed to SSH, normally your public IP as x.x.x.x/32."
+  description = "CIDRs allowed to SSH, normally your public IP as x.x.x.x/32. May be empty for private hosts that use ssh_source_security_group_ids."
   type        = list(string)
 
   validation {
-    condition     = length(var.allowed_ssh_cidrs) > 0 && alltrue([for c in var.allowed_ssh_cidrs : can(cidrhost(c, 0)) && c != "0.0.0.0/0"])
-    error_message = "Provide at least one valid CIDR. 0.0.0.0/0 is refused: scanners find open SSH within minutes."
+    condition     = alltrue([for c in var.allowed_ssh_cidrs : can(cidrhost(c, 0)) && c != "0.0.0.0/0"])
+    error_message = "Every entry must be a valid CIDR. 0.0.0.0/0 is refused: scanners find open SSH within minutes."
   }
+}
+
+variable "ssh_source_security_group_ids" {
+  description = "Security groups allowed to SSH (e.g. a bastion's SG). Used for hosts in private subnets."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = length(var.allowed_ssh_cidrs) + length(var.ssh_source_security_group_ids) > 0
+    error_message = "Allow SSH from at least one CIDR (allowed_ssh_cidrs) or security group (ssh_source_security_group_ids)."
+  }
+}
+
+variable "associate_public_ip" {
+  description = "Give the instance a public IPv4 address. false for hosts in private subnets."
+  type        = bool
+  default     = true
 }
 
 variable "app_ingress" {

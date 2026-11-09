@@ -192,18 +192,20 @@ sudo ss -tlnp | grep -E ':(80|443)\b'
 directory has wrong ownership`, or the container is `OOMKilled`.
 
 **Likely causes:** the `pg-data` volume was created by a different image or as root (e.g. you
-replaced the named volume with a bind mount); memory limit too small during recovery; disk full.
+replaced the named volume with a bind mount); the volume still holds a PostgreSQL 17 layout
+(`/var/lib/postgresql/data`) mounted where 18 expects `/var/lib/postgresql/18/docker`; memory limit too
+small during recovery; disk full.
 
 **Diagnose:**
 
 ```bash
 docker compose logs db | tail -n 30
-docker run --rm -v taskboard_pg-data:/v alpine:3.22 ls -lan /v /v/pgdata | head
+docker run --rm -v taskboard_pg-data:/v alpine:3.23 ls -lan /v /v/18/docker | head
 docker inspect -f '{{.State.OOMKilled}}' "$(docker compose ps -aq db)"
 df -h /
 ```
 
-**Resolve:** fix ownership `docker run --rm -v taskboard_pg-data:/v alpine:3.22 chown -R 70:70 /v`;
+**Resolve:** fix ownership `docker run --rm -v taskboard_pg-data:/v alpine:3.23 chown -R 70:70 /v`;
 free disk; restore from backup into a fresh volume if the data directory is corrupt.
 
 **Prevent:** named volumes, fixed UID, disk alerts, tested restores (exercise 7).

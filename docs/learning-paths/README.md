@@ -35,7 +35,7 @@ Linux → Networking → Docker → Terraform → Basic cloud → Kubernetes
 | 2 | AWS 01 exercises 3, 6, 9 | [Networking & firewalls](../concepts/linux-networking-firewalls.md), [USE method](../concepts/linux-performance-troubleshooting.md) | Diagnose network and resource problems |
 | 3 | [AWS 02 Dockerized app](../../projects/aws/02-dockerized-app-on-vm/) | [Images](../concepts/docker-images-and-builds.md), [container security](../concepts/container-security.md) | Build and run hardened containers |
 | 4 | [AWS 03 Multi-service app](../../projects/aws/03-multi-service-docker-app/) | [Compose](../concepts/docker-compose.md), [reverse proxy & TLS](../concepts/reverse-proxy-and-tls.md) | Run a multi-tier stack with TLS and backups |
-| 5 | AWS 04 Terraform networking *(planned)* | [Terraform fundamentals](../concepts/terraform-fundamentals.md) | Reusable network foundation with remote state |
+| 5 | [AWS 04 Terraform networking](../../projects/aws/04-terraform-networking-foundations/) | [Terraform fundamentals](../concepts/terraform-fundamentals.md), [state & locking](../concepts/terraform-state-and-locking.md), [VPC design](../concepts/aws-vpc-design.md) | Reusable network foundation with remote state |
 | 6 | AWS 07 Managed Kubernetes *(planned)* | — | First cluster |
 
 ## Intermediate
@@ -45,7 +45,7 @@ Multi-tier architecture → CI/CD → Kubernetes → Helm → GitOps → Monitor
 | Step | Do | Focus |
 |---|---|---|
 | 1 | [AWS 03](../../projects/aws/03-multi-service-docker-app/) — attempts 3–5 of the repeat practice | Design tiers and isolation yourself |
-| 2 | AWS 05 Highly available server app *(planned)* | Load balancing, autoscaling |
+| 2 | [AWS 05 Highly available server app](../../projects/aws/05-highly-available-server-app/) | Load balancing, autoscaling, [concept guide](../concepts/load-balancing-and-autoscaling.md) |
 | 3 | AWS 06 Secure CI/CD *(planned)* | OIDC, scanning, provenance |
 | 4 | AWS 07–08 Kubernetes *(planned)* | Cluster, probes, HPA, NetworkPolicy |
 | 5 | AWS 09 Helm + Argo CD *(planned)* | GitOps delivery |
@@ -58,7 +58,7 @@ Security → Reliability → Stateful workloads → Observability → Disaster r
 | Step | Do | Focus |
 |---|---|---|
 | 1 | Security review of AWS 01–03: challenge every ADR's security section | Threat modelling |
-| 2 | AWS 05 + 14 *(planned)* | Failure domains, recovery |
+| 2 | [AWS 05](../../projects/aws/05-highly-available-server-app/) failure drills + AWS 14 *(planned)* | Failure domains, recovery |
 | 3 | AWS 10 *(planned)* | Snapshots, restore drills |
 | 4 | AWS 11–13 *(planned)* | Metrics, logs, traces together |
 | 5 | AWS 14 *(planned)* | Chaos experiments, postmortems |
@@ -77,8 +77,8 @@ Choose role → review concepts → study architecture → solve failure scenari
 | Role | Focus labs (implemented now) | Questions to master | Planned additions |
 |---|---|---|---|
 | DevOps Engineer | AWS 02, 03 | [Docker layers](../../projects/aws/02-dockerized-app-on-vm/docs/interview.md#q2-intermediate--how-do-docker-layers-and-the-build-cache-work-and-how-do-you-write-a-dockerfile-that-builds-fast), [bad deploy recovery](../../projects/aws/02-dockerized-app-on-vm/docs/interview.md#q6-scenario--a-deploy-broke-production-on-a-single-docker-host-walk-me-through-recovery-and-prevention), [secrets](../../projects/aws/03-multi-service-docker-app/docs/interview.md#q5-intermediate--how-do-you-handle-secrets-in-a-compose-deployment) | 04, 06, 09 |
-| Senior DevOps Engineer | AWS 02, 03 (all ADRs) | [registry vs SSH builds](../../projects/aws/02-dockerized-app-on-vm/docs/interview.md#q7-advanced--why-does-this-lab-build-images-on-the-vm-over-ssh-instead-of-pushing-to-a-registry-when-is-that-wrong), [when to leave Compose](../../projects/aws/03-multi-service-docker-app/docs/interview.md#q7-advanced--when-would-you-move-this-stack-off-compose-and-to-what) | 05, 06, 15 |
-| Site Reliability Engineer | AWS 01, 03 | [slow server](../../projects/aws/01-linux-server-engineering/docs/interview.md#q2-intermediate--a-linux-server-is-slow-how-do-you-troubleshoot-it), [liveness vs readiness](../../projects/aws/02-dockerized-app-on-vm/docs/interview.md#q5-intermediate--liveness-vs-readiness-why-does-taskboard-have-both-healthz-and-readyz), [DB recovery RPO/RTO](../../projects/aws/03-multi-service-docker-app/docs/interview.md#q6-scenario--the-database-volume-is-corrupted-walk-through-recovery-and-what-rporto-you-can-promise) | 11, 14 |
-| Cloud Engineer | AWS 01 | [IMDSv2](../../projects/aws/01-linux-server-engineering/docs/interview.md#q7-advanced--what-is-imdsv2-and-why-does-this-lab-set-the-hop-limit-to-1), [SG vs host firewall](../../projects/aws/01-linux-server-engineering/docs/interview.md#q4-advanced--security-group-vs-host-firewall-why-both) | 04, 05 |
+| Senior DevOps Engineer | AWS 02–05 (all ADRs) | [registry vs SSH builds](../../projects/aws/02-dockerized-app-on-vm/docs/interview.md#q7-advanced--why-does-this-lab-build-images-on-the-vm-over-ssh-instead-of-pushing-to-a-registry-when-is-that-wrong), [when to leave Compose](../../projects/aws/03-multi-service-docker-app/docs/interview.md#q7-advanced--when-would-you-move-this-stack-off-compose-and-to-what) | 06, 15 |
+| Site Reliability Engineer | AWS 01, 03, 05 | [slow server](../../projects/aws/01-linux-server-engineering/docs/interview.md#q2-intermediate--a-linux-server-is-slow-how-do-you-troubleshoot-it), [liveness vs readiness](../../projects/aws/02-dockerized-app-on-vm/docs/interview.md#q5-intermediate--liveness-vs-readiness-why-does-taskboard-have-both-healthz-and-readyz), [DB recovery RPO/RTO](../../projects/aws/03-multi-service-docker-app/docs/interview.md#q6-scenario--the-database-volume-is-corrupted-walk-through-recovery-and-what-rporto-you-can-promise) | 11, 14 |
+| Cloud Engineer | AWS 01, 04, 05 | [NAT strategy](../../projects/aws/04-terraform-networking-foundations/docs/interview.md#q2-intermediate--nat-gateway-or-nat-instance-how-many), [IMDSv2](../../projects/aws/01-linux-server-engineering/docs/interview.md#q7-advanced--what-is-imdsv2-and-why-does-this-lab-set-the-hop-limit-to-1), [SG vs host firewall](../../projects/aws/01-linux-server-engineering/docs/interview.md#q4-advanced--security-group-vs-host-firewall-why-both) | 06, 07 |
 | Platform Engineer | AWS 02, 03 | [container hardening](../../projects/aws/02-dockerized-app-on-vm/docs/interview.md#q3-intermediate--how-do-you-harden-a-container-at-runtime), [service discovery](../../projects/aws/03-multi-service-docker-app/docs/interview.md#q2-intermediate--how-do-containers-in-a-compose-project-find-each-other) | 07, 09 |
 | Kubernetes Engineer | AWS 02, 03 (foundations) | [containers vs VMs](../../projects/aws/02-dockerized-app-on-vm/docs/interview.md#q1-beginner--what-is-the-difference-between-a-container-and-a-virtual-machine), [depends_on](../../projects/aws/03-multi-service-docker-app/docs/interview.md#q3-intermediate--why-does-depends_on-not-guarantee-the-database-is-available) | 07, 08, 10 |

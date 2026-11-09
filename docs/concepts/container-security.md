@@ -17,7 +17,7 @@ privilege. A remote-code-execution bug in one container should not become contro
 
 | Layer | Control | Lab setting |
 |---|---|---|
-| Image | Small base, no build tools, scanned | multi-stage `python:3.13-slim-trixie` |
+| Image | Small base, no build tools, scanned | multi-stage `python:3.14-slim-trixie` |
 | Identity | Non-root `USER`, fixed UID | 10001 (API), 101 (NGINX), 70 (PostgreSQL) |
 | Privileges | `--cap-drop ALL`, `no-new-privileges` | both, every service |
 | Filesystem | `--read-only`, tmpfs for scratch | read-only root, `/tmp` tmpfs `noexec` |
@@ -53,7 +53,7 @@ flowchart LR
 docker inspect -f '{{.Config.User}} ro={{.HostConfig.ReadonlyRootfs}} caps={{.HostConfig.CapDrop}} sec={{.HostConfig.SecurityOpt}}' <ctr>
 docker exec <ctr> grep -E 'CapEff|CapBnd|NoNewPrivs|Seccomp' /proc/1/status
 docker stats --no-stream
-docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.75.0 image --severity HIGH,CRITICAL <image>
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:0.76.2 image --severity HIGH,CRITICAL <image>
 ```
 
 ## References

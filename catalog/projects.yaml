@@ -114,8 +114,12 @@ projects:
   - aws-01
   services:
   - VPC
-  - NAT Gateway
-  - S3 (state + lock file)
+  - Internet Gateway
+  - NAT instance / NAT Gateway (opt-in)
+  - S3 gateway endpoint
+  - Network ACLs
+  - Security groups
+  - S3 (state + native lock file)
   - IAM
   skills: &id004
   - terraform-modules
@@ -126,14 +130,15 @@ projects:
   - nat
   - firewall-rules
   free_tier:
-    fit: partial
-    notes: NAT Gateway is never free; lab will offer a NAT-less or NAT-instance variant
-  status: planned
+    fit: fits
+    notes: 'Default nat_mode=none: 2 x t3.micro test hosts + S3 state bucket. nat_mode=instance uses free-tier hours;
+      nat_mode=gateway is billed (never free)'
+  status: implemented
   validation:
-    static: not-run
-    local: not-run
+    static: passed
+    local: n/a
     deployment: not-tested
-  planned_path: projects/aws/04-terraform-networking-foundations
+  path: projects/aws/04-terraform-networking-foundations
 - id: aws-05
   cloud: aws
   number: 5
@@ -141,13 +146,16 @@ projects:
   difficulty: intermediate
   build_hours: 5
   depends_on:
-  - aws-02
   - aws-04
+  - aws-01
   services:
   - Application Load Balancer
   - EC2 Auto Scaling
   - Launch Templates
-  - CloudWatch
+  - RDS for PostgreSQL
+  - SSM Parameter Store
+  - CloudWatch (target tracking)
+  - IAM
   skills: &id005
   - load-balancing
   - autoscaling
@@ -156,13 +164,14 @@ projects:
   - immutable-infrastructure
   free_tier:
     fit: partial
-    notes: ALB and >1 instance-hour per hour; short sessions only
-  status: planned
+    notes: ALB, 2 x t3.micro and single-AZ db.t4g.micro are free-tier eligible on legacy accounts, but two instances
+      consume 750 h/month twice as fast; short sessions only. Multi-AZ RDS is never free
+  status: implemented
   validation:
-    static: not-run
-    local: not-run
+    static: passed
+    local: n/a
     deployment: not-tested
-  planned_path: projects/aws/05-highly-available-server-app
+  path: projects/aws/05-highly-available-server-app
 - id: aws-06
   cloud: aws
   number: 6

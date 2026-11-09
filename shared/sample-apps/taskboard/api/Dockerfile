@@ -3,7 +3,7 @@
 # Stage 1 builds wheels with the full toolchain; stage 2 only copies the installed packages,
 # so compilers and pip caches never reach the runtime image.
 
-FROM python:3.13-slim-trixie AS build
+FROM python:3.14-slim-trixie AS build
 WORKDIR /build
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_NO_CACHE_DIR=1
 # Copy only the dependency list first: this layer (the slow one) is reused until
@@ -12,7 +12,7 @@ COPY requirements.txt .
 RUN python -m venv /opt/venv \
  && /opt/venv/bin/pip install --no-compile -r requirements.txt
 
-FROM python:3.13-slim-trixie AS runtime
+FROM python:3.14-slim-trixie AS runtime
 ARG APP_VERSION=dev
 LABEL org.opencontainers.image.title="taskboard-api" \
       org.opencontainers.image.version="${APP_VERSION}"

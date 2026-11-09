@@ -50,8 +50,8 @@ start if `api` does not exist yet).
 
 ```bash
 docker network inspect taskboard_backend --format '{{.Internal}} {{range .Containers}}{{.Name}} {{end}}'
-docker run --rm --network taskboard_backend alpine:3.22 wget -T 3 -O /dev/null https://example.com   # fails
-docker run --rm --network taskboard_edge postgres:17-alpine pg_isready -h db -t 3                     # fails
+docker run --rm --network taskboard_backend alpine:3.23 wget -T 3 -O /dev/null https://example.com   # fails
+docker run --rm --network taskboard_edge postgres:18-alpine pg_isready -h db -t 3                     # fails
 docker compose exec db sh -c 'cat /proc/net/route'      # no default route
 sudo ss -tlnp | grep -E ':(80|443|5432|8000)\b'
 ```

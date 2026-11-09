@@ -17,8 +17,8 @@ flowchart LR
 
 | Component | Path | Image base | Port | Runs as |
 |---|---|---|---|---|
-| API | [api/](api/) | `python:3.13-slim-trixie` (multi-stage) | 8000 | UID 10001 |
-| Frontend | [frontend/](frontend/) | `nginxinc/nginx-unprivileged:1.28-alpine` | 8080 | UID 101 |
+| API | [api/](api/) | `python:3.14-slim-trixie` (multi-stage) | 8000 | UID 10001 |
+| Frontend | [frontend/](frontend/) | `nginxinc/nginx-unprivileged:1.31-alpine` | 8080 | UID 101 |
 
 ## API contract
 
@@ -45,7 +45,7 @@ flowchart LR
 
 ```bash
 cd shared/sample-apps/taskboard/api
-python3 -m venv .venv && . .venv/bin/activate
+python3.14 -m venv .venv && . .venv/bin/activate      # Python 3.14 required
 pip install -r requirements-dev.txt
 pytest -q                                   # unit tests
 DATABASE_URL=sqlite:///./taskboard.db uvicorn app.main:app --port 8000

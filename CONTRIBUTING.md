@@ -59,7 +59,7 @@ Only after you actually ran it in your own account:
 deployment_record:
   date: 2026-11-20
   region: us-east-1
-  terraform_version: 1.15.6
+  terraform_version: 1.17.1
   provider_versions: { aws: 6.x.y }
   verify_output: "All checks passed."   # or a link to a gist with the full output
   tester: your-github-handle

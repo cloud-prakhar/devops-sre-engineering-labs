@@ -2,13 +2,20 @@
 # Baseline for AWS lab 01. Every setting here is inspected or changed in docs/exercises.md.
 package_update: true
 package_upgrade: true
+# Ubuntu 24.04 ships Python 3.12. The app targets Python 3.14, packaged for noble by the
+# deadsnakes PPA (signed; cloud-init imports the PPA key from Launchpad).
+apt:
+  sources:
+    deadsnakes:
+      source: "ppa:deadsnakes/ppa"
 packages:
+  - python3.14
+  - python3.14-venv
   - ufw
   - unattended-upgrades
   - sysstat
   - stress-ng
   - jq
-  - python3-venv
   - rsync
   - auditd
 

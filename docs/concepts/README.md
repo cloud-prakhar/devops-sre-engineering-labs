@@ -19,6 +19,9 @@ repeating the material.
 | Containers | [Docker Compose](docker-compose.md) | AWS 03 |
 | Reliability | [Health checks: liveness and readiness](health-checks.md) | AWS 02–03 |
 | Edge | [Reverse proxies and TLS](reverse-proxy-and-tls.md) | AWS 03 |
+| Cloud networking | [AWS VPC design: subnets, routing, NAT, endpoints](aws-vpc-design.md) | AWS 04–05 |
+| IaC | [Terraform remote state and locking](terraform-state-and-locking.md) | AWS 04–05 |
+| Reliability | [Load balancing, health checks and autoscaling](load-balancing-and-autoscaling.md) | AWS 05 |
 
 New guides are added together with the first lab that needs them (Kubernetes, observability and SRE
 guides arrive with AWS 07, 11 and 14).

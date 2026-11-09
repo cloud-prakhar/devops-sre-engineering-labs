@@ -74,7 +74,7 @@ flowchart LR
 | Security group | Cloud-level stateful firewall: SSH only from your IP, egress only 80/443 | [shared lab-host](../../../shared/terraform-modules/aws/lab-host/main.tf) |
 | ufw | Host-level firewall. Second layer if the SG is ever opened by mistake | [cloud-init](terraform/cloud-init.yaml.tftpl) |
 | sshd drop-in | Keys only, no root, `AllowGroups ssh-users`, limited forwarding | [10-lab-hardening.conf](files/10-lab-hardening.conf) |
-| `taskboard.service` | The shared sample API under a systemd sandbox, bound to loopback | [taskboard.service](files/taskboard.service) |
+| `taskboard.service` | The shared sample API under a systemd sandbox, bound to loopback | [shared taskboard.service](../../../shared/linux-service/taskboard.service) |
 | journald / sysstat / auditd | Persistent logs, historical CPU/memory/disk data (`sar`), audit trail | [journald-lab.conf](files/journald-lab.conf) |
 | unattended-upgrades | Daily security patches, manual reboots | [52-lab-unattended-upgrades](files/52-lab-unattended-upgrades) |
 | IAM role + SSM | Shell access that needs no open port, and a recovery path if SSH breaks | [shared lab-host](../../../shared/terraform-modules/aws/lab-host/main.tf) |

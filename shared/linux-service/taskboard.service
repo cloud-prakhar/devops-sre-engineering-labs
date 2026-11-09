@@ -2,7 +2,7 @@
 # Runs the Taskboard API natively (no containers) with systemd sandboxing.
 # Inspect the sandbox score with:  systemd-analyze security taskboard
 [Unit]
-Description=Taskboard API (lab 01)
+Description=Taskboard API
 Documentation=https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html
 After=network-online.target
 Wants=network-online.target
@@ -16,11 +16,14 @@ Type=exec
 User=taskboard
 Group=taskboard
 WorkingDirectory=/opt/taskboard/app
+# Defaults (AWS 01): SQLite, loopback only — reachable from the host itself or through an SSH tunnel.
+# /etc/taskboard/taskboard.env overrides them (AWS 05: TASKBOARD_HOST=0.0.0.0 behind a load balancer,
+# DATABASE_URL pointing at RDS, DATABASE_PASSWORD_FILE).
 Environment=DATABASE_URL=sqlite:////var/lib/taskboard/taskboard.db
 Environment=APP_VERSION=lab01
+Environment=TASKBOARD_HOST=127.0.0.1
 EnvironmentFile=-/etc/taskboard/taskboard.env
-# Bound to loopback: only reachable from the host itself or through an SSH tunnel.
-ExecStart=/opt/taskboard/venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --no-access-log
+ExecStart=/opt/taskboard/venv/bin/uvicorn app.main:app --host ${TASKBOARD_HOST} --port 8000 --no-access-log
 Restart=on-failure
 RestartSec=3
 TimeoutStopSec=20

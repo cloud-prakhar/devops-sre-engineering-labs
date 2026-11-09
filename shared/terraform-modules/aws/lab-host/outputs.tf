@@ -4,7 +4,7 @@ output "instance_id" {
 }
 
 output "public_ip" {
-  description = "Public IPv4 address. Changes if the instance is stopped and started."
+  description = "Public IPv4 address (empty for private hosts). Changes if the instance is stopped and started."
   value       = aws_instance.host.public_ip
 }
 

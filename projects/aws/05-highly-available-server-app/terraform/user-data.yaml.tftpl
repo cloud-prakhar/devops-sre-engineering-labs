@@ -1,0 +1,56 @@
+#cloud-config
+# AWS 05 app instance. Every instance in the Auto Scaling group boots from this document, so it
+# must be fully automatic and idempotent: no manual steps, no state on the instance.
+package_update: true
+package_upgrade: false   # immutable instances: patch by rolling a new launch template version
+apt:
+  sources:
+    deadsnakes:
+      source: "ppa:deadsnakes/ppa"
+packages:
+  - python3.14
+  - python3.14-venv
+  - rsync
+  - curl
+
+write_files:
+%{ for path, content in files ~}
+  - path: ${path}
+    encoding: b64
+    content: ${content}
+    permissions: "0644"
+%{ endfor ~}
+  - path: /etc/systemd/system/taskboard.service
+    encoding: b64
+    content: ${taskboard_service}
+    permissions: "0644"
+  - path: /usr/local/sbin/install-taskboard
+    encoding: b64
+    content: ${install_taskboard}
+    permissions: "0755"
+  - path: /etc/taskboard/taskboard.env
+    permissions: "0644"
+    content: |
+      TASKBOARD_HOST=0.0.0.0
+      DATABASE_URL=postgresql://taskboard@${db_host}:5432/taskboard?sslmode=require
+      DATABASE_PASSWORD_FILE=/etc/taskboard/db_password
+      APP_VERSION=${app_version}
+
+runcmd:
+  - [snap, install, aws-cli, --classic]
+  - [sh, -c, "id taskboard >/dev/null 2>&1 || useradd --system --no-create-home --home-dir /nonexistent --shell /usr/sbin/nologin taskboard"]
+  # Read the password from SSM Parameter Store (retries: IAM role credentials can lag at boot).
+  - - sh
+    - -c
+    - |
+      umask 027
+      for i in 1 2 3 4 5 6; do
+        /snap/bin/aws ssm get-parameter --region ${region} --name '${db_password_param}' --with-decryption \
+          --query Parameter.Value --output text > /etc/taskboard/db_password && break
+        sleep 10
+      done
+      chgrp taskboard /etc/taskboard/db_password
+      test -s /etc/taskboard/db_password
+  - [/usr/local/sbin/install-taskboard, /opt/taskboard-src]
+
+final_message: "lab05 app instance ready after $UPTIME seconds"

@@ -58,7 +58,7 @@ def project_checks(p: dict) -> dict[str, bool]:
 
     return {
         "docs": readme.exists() and all(s in readme_text for s in README_SECTIONS),
-        "iac": (base / "terraform").is_dir() and any((base / "terraform").glob("*.tf")),
+        "iac": (base / "terraform").is_dir() and any((base / "terraform").rglob("*.tf")),
         "app": (base / "scripts").is_dir() and any((base / "scripts").glob("*.sh")),
         "diagrams": mermaid_blocks(readme_text) >= 2,
         "adr": len(adrs) >= 1 and all("## Decision" in a.read_text(encoding="utf-8") for a in adrs),

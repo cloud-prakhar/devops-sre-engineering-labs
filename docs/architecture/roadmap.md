@@ -34,7 +34,11 @@ flowchart LR
 | Artefact | Introduced | Reused by |
 |---|---|---|
 | Taskboard app (`/healthz`, `/readyz`, `/metrics`, JSON logs) | shared | every lab; `/metrics` scraped in 11, JSON logs parsed in 12, instrumented in 13 |
-| `lab-network`, `lab-host` modules | AWS 01 | AWS 02–03; replaced by the full network module in AWS 04 |
+| `lab-network`, `lab-host` modules | AWS 01 | AWS 02–04 (`lab-host` also builds AWS 04's bastion and private test host) |
+| `vpc` module (multi-AZ, tiered SGs, NACL, S3 endpoint, `nat_mode`) | AWS 04 | AWS 05; EKS labs (planned) |
+| S3 state bucket with native locking | AWS 04 | AWS 05+ via `shared/scripts/tf-init-backend.sh` |
+| Hardened systemd service (`shared/linux-service`) | AWS 01 | AWS 05 instances |
+| Write-only secrets (ephemeral → `*_wo`) | AWS 05 | every later lab with credentials |
 | Docker host cloud-init | AWS 02 | AWS 03 |
 | Hardened container profile | AWS 02 | AWS 03 Compose anchor → Kubernetes `securityContext` in 08 |
 | Health-gated rollout + rollback | AWS 02 | ALB health checks (05), Kubernetes rolling updates (08), Argo CD (09) |

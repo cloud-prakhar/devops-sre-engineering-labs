@@ -1,0 +1,10 @@
+aws_region          = "us-east-1"
+owner               = "your-name"
+allowed_http_cidrs  = ["203.0.113.10/32"] # your IP; the ALB is reachable only from here
+app_version         = "v1"                # change to roll out a new version (instance refresh)
+instance_type       = "t3.micro"
+asg_min             = 2
+asg_max             = 4
+cpu_target_percent  = 50
+db_engine_version   = "18"
+db_password_version = 1 # increment to rotate the DB password (then roll instances)

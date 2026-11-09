@@ -1,6 +1,6 @@
 # systemd: services, restart policy, sandboxing and journald
 
-> Used in: [AWS 01](../../projects/aws/01-linux-server-engineering/) ([taskboard.service](../../projects/aws/01-linux-server-engineering/files/taskboard.service)) · every VM lab (Docker, sshd, unattended-upgrades are systemd units)
+> Used in: [AWS 01](../../projects/aws/01-linux-server-engineering/) ([taskboard.service](../../shared/linux-service/taskboard.service)) · every VM lab (Docker, sshd, unattended-upgrades are systemd units)
 
 ## What it is
 

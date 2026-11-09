@@ -18,10 +18,10 @@ decides how fast CI is, how large pulls are, and how many vulnerabilities you sh
 ```mermaid
 flowchart TB
     subgraph build[stage: build]
-        b1[FROM python:3.13-slim-trixie]:::data --> b2[COPY requirements.txt]:::app --> b3[RUN python -m venv + pip install]:::app
+        b1[FROM python:3.14-slim-trixie]:::data --> b2[COPY requirements.txt]:::app --> b3[RUN python -m venv + pip install]:::app
     end
     subgraph runtime[stage: runtime]
-        r1[FROM python:3.13-slim-trixie]:::data --> r2[RUN useradd 10001]:::sec
+        r1[FROM python:3.14-slim-trixie]:::data --> r2[RUN useradd 10001]:::sec
         r2 --> r3[COPY --from=build /opt/venv]:::app --> r4[COPY app]:::app
         r4 --> r5[USER 10001 · HEALTHCHECK · CMD]:::sec
     end

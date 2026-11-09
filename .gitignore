@@ -32,3 +32,6 @@ node_modules/
 # Validation artefacts
 .terraform-plugin-cache/
 **/backups-localtest/
+
+# Temporary file written by scripts/validate.sh cloudinit
+zz_validate_backend_override.tf

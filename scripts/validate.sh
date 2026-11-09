@@ -9,12 +9,13 @@ set -uo pipefail
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$ROOT" || exit 1
 
-HADOLINT_IMAGE=hadolint/hadolint:v2.12.0
-SHELLCHECK_IMAGE=koalaman/shellcheck:v0.10.0
+HADOLINT_IMAGE=hadolint/hadolint:v2.15.1
+SHELLCHECK_IMAGE=koalaman/shellcheck:v0.11.0
 TFLINT_IMAGE=ghcr.io/terraform-linters/tflint:v0.66.0
-TRIVY_IMAGE=aquasec/trivy:0.75.0
+TRIVY_IMAGE=aquasec/trivy:0.76.2
 GITLEAKS_IMAGE=zricethezav/gitleaks:v8.30.1
-PYTHON_IMAGE=python:3.13-slim-trixie
+PYTHON_IMAGE=python:3.14-slim-trixie
+NODE_IMAGE=node:26-alpine
 
 results=()
 record() { results+=("$1|$([[ $2 -eq 0 ]] && echo PASS || echo FAIL)"); }   # group, exit status
@@ -22,7 +23,8 @@ have() { command -v "$1" >/dev/null 2>&1; }
 dockerized() { docker run --rm -v "$ROOT:/repo" -w /repo "$@"; }
 section() { printf '\n\033[34m== %s\033[0m\n' "$1"; }
 
-tf_dirs() { find projects -type d -name terraform -not -path '*/.terraform/*' | sort; }
+# Every directory under projects/ that holds .tf files is a root module (labs may have several stacks).
+tf_dirs() { find projects -name '*.tf' -not -path '*/.terraform/*' -exec dirname {} \; | sort -u; }
 shell_files() { git ls-files -co --exclude-standard -- '*.sh' 2>/dev/null || find . -name '*.sh' -not -path './scripts/mermaid/node_modules/*'; }
 
 run_terraform() {
@@ -74,7 +76,7 @@ run_yaml() {
   section "yaml: yamllint"
   local ok=0
   if have yamllint; then yamllint -s . || ok=1
-  else dockerized --entrypoint sh "$PYTHON_IMAGE" -c 'pip -q install yamllint==1.37.1 && yamllint -s .' || ok=1; fi
+  else dockerized --entrypoint sh "$PYTHON_IMAGE" -c 'pip -q install yamllint==1.38.0 && yamllint -s .' || ok=1; fi
   record yaml "$ok"
 }
 
@@ -97,8 +99,15 @@ run_compose() {
 run_mermaid() {
   section "mermaid: parse every diagram"
   local ok=0
-  if [[ ! -d scripts/mermaid/node_modules ]]; then (cd scripts/mermaid && npm ci --no-audit --no-fund --silent) || ok=1; fi
-  node scripts/mermaid/validate-mermaid.mjs || ok=1
+  # jsdom needs Node >= 22.22; use a pinned Node container when the local Node is older.
+  if have node && node -e 'const [a,b,c]=process.versions.node.split(".").map(Number); process.exit(a>22||(a==22&&(b>22||(b==22&&c>=2)))?0:1)'; then
+    if [[ ! -d scripts/mermaid/node_modules ]]; then (cd scripts/mermaid && npm ci --no-audit --no-fund --silent) || ok=1; fi
+    node scripts/mermaid/validate-mermaid.mjs || ok=1
+  else
+    echo "local Node missing or older than 22.22; using $NODE_IMAGE"
+    docker run --rm -v "$ROOT:/repo:ro" "$NODE_IMAGE" sh -c \
+      'cp -r /repo/scripts/mermaid /tmp/m && cd /tmp/m && rm -rf node_modules && npm ci --no-audit --no-fund --silent && node validate-mermaid.mjs /repo' || ok=1
+  fi
   record mermaid "$ok"
 }
 
@@ -140,18 +149,42 @@ run_cloudinit() {
   ssh-keygen -q -t ed25519 -N '' -f "$tmp/key" -C validate-only
   mkdir -p "$tmp/ci" "$tmp/units"
   for d in $(tf_dirs); do
-    out="$tmp/ci/$(basename "$(dirname "$d")").yaml"
-    terraform -chdir="$d" init -backend=false -input=false >/dev/null || { ok=1; continue; }
-    # terraform console prints heredoc markers around multi-line strings; strip them.
-    if echo 'local.user_data' | terraform -chdir="$d" console \
-         -var 'allowed_ssh_cidrs=["203.0.113.10/32"]' -var "ssh_public_key_path=$tmp/key.pub" \
-         | sed -e '/^<<EOT$/d' -e '/^EOT$/d' > "$out" && [[ -s "$out" ]]; then
-      echo "rendered: $d"
+    grep -qs 'user_data *=' "$d"/*.tf || continue        # stacks without hosts (e.g. state bootstrap)
+    out="$tmp/ci/$(echo "$d" | cut -d/ -f3- | tr '/' '_').yaml"
+    # console needs an initialised backend: use a throwaway local backend and a separate data dir,
+    # so the developer's real (S3) initialisation in $d/.terraform is never touched.
+    local override="$d/zz_validate_backend_override.tf" data
+    data="$tmp/data-$(echo "$d" | tr '/' '_')"
+    if grep -qs 'backend "s3"' "$d"/*.tf; then
+      printf 'terraform {\n  backend "local" {\n    path = "%s/state.tfstate"\n  }\n}\n' "$data" > "$override"
+    fi
+    local expr='local.user_data'
+    grep -qs 'user_data_placeholders' "$d"/*.tf \
+      && expr='templatefile(local.user_data_template, merge(local.user_data_vars, local.user_data_placeholders))'
+    # Only pass variables the stack declares: undeclared ones produce warnings in console output.
+    : > "$tmp/test.tfvars"
+    grep -qs 'variable "allowed_ssh_cidrs"' "$d"/*.tf && echo 'allowed_ssh_cidrs = ["203.0.113.10/32"]' >> "$tmp/test.tfvars"
+    grep -qs 'variable "ssh_public_key_path"' "$d"/*.tf && echo "ssh_public_key_path = \"$tmp/key.pub\"" >> "$tmp/test.tfvars"
+    grep -qs 'variable "allowed_http_cidrs"' "$d"/*.tf && echo 'allowed_http_cidrs = ["203.0.113.10/32"]' >> "$tmp/test.tfvars"
+    if TF_DATA_DIR="$data" terraform -chdir="$d" init -input=false >/dev/null \
+       && echo "$expr" | TF_DATA_DIR="$data" terraform -chdir="$d" console -var-file="$tmp/test.tfvars" 2>/dev/null \
+         | sed -e '/^<<EOT$/d' -e '/^EOT$/d' > "$out" && [[ $(head -n1 "$out") == "#cloud-config" ]]; then
+      # EC2 limits user data to 16 KB before base64; every lab gzips it (base64gzip).
+      local size; size=$(gzip -c "$out" | wc -c)
+      if (( size > 14000 )); then echo "TOO LARGE: $d user data is $size bytes gzipped (limit 16384)"; ok=1; fi
+      echo "rendered: $d ($size bytes gzipped)"
     else
       echo "RENDER FAILED: $d"; ok=1
     fi
+    rm -f "$override"
   done
-  find projects -name '*.service' -path '*/files/*' -exec cp {} "$tmp/units/" \;
+  # Templates inside shared modules use simple ${var} placeholders; render them with sample values.
+  for t in shared/terraform-modules/aws/*/*.yaml.tftpl; do
+    [[ -e "$t" ]] || continue
+    sed -e 's/\${vpc_cidr}/10.40.0.0\/16/g' "$t" > "$tmp/ci/module_$(basename "$(dirname "$t")")_$(basename "$t" .tftpl)"
+    echo "rendered: $t"
+  done
+  find projects shared -name '*.service' -not -path '*/node_modules/*' -exec cp {} "$tmp/units/" \;
   docker run --rm -v "$tmp:/t:ro" ubuntu:24.04 bash -c '
     set -u; rc=0
     export DEBIAN_FRONTEND=noninteractive

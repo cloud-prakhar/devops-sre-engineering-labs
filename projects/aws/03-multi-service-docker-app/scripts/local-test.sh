@@ -36,12 +36,12 @@ curl -fsSk -X POST "$BASE/api/tasks" -H 'content-type: application/json' -d '{"t
 info "Isolation"
 published=$(dc ps --format '{{.Service}} {{.Publishers}}' | grep -v '^proxy' | grep -c 'PublishedPort:[1-9]' || true)
 [[ "$published" == "0" ]] && pass "only the proxy publishes ports" || fail "other services publish ports"
-if docker run --rm --network taskboard_edge postgres:17-alpine pg_isready -h db -t 3 >/dev/null 2>&1; then
+if docker run --rm --network taskboard_edge postgres:18-alpine pg_isready -h db -t 3 >/dev/null 2>&1; then
   fail "database reachable from the edge network"
 else
   pass "database not reachable from the edge network"
 fi
-if docker run --rm --network taskboard_backend alpine:3.22 wget -q -T 3 -O /dev/null https://pypi.org >/dev/null 2>&1; then
+if docker run --rm --network taskboard_backend alpine:3.23 wget -q -T 3 -O /dev/null https://pypi.org >/dev/null 2>&1; then
   fail "backend network has internet access"
 else
   pass "backend network is internal (no internet)"
@@ -69,7 +69,7 @@ info "Failure: API recreated with a new IP"
 old_ip=$(docker inspect -f '{{(index .NetworkSettings.Networks "taskboard_edge").IPAddress}}' "$(dc ps -q api)")
 dc rm -sf api >/dev/null 2>&1
 # Occupy the freed address so the new API container is forced onto a different IP.
-docker run -d --rm --name taskboard-ip-squatter --network taskboard_edge alpine:3.22 sleep 120 >/dev/null
+docker run -d --rm --name taskboard-ip-squatter --network taskboard_edge alpine:3.23 sleep 120 >/dev/null
 dc up -d --wait >/dev/null 2>&1
 docker rm -f taskboard-ip-squatter >/dev/null
 sleep 11   # resolver valid=10s

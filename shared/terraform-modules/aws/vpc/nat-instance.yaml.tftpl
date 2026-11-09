@@ -1,0 +1,35 @@
+#cloud-config
+# NAT instance: forward packets from the private subnets and masquerade them behind this
+# instance's public IP.
+package_update: true
+packages:
+  - nftables
+write_files:
+  - path: /etc/sysctl.d/90-nat.conf
+    content: |
+      net.ipv4.ip_forward = 1
+  - path: /etc/nftables-nat.conf
+    content: |
+      table ip nat {
+        chain postrouting {
+          type nat hook postrouting priority srcnat; policy accept;
+          ip saddr ${vpc_cidr} ip daddr != ${vpc_cidr} masquerade
+        }
+      }
+  - path: /etc/systemd/system/lab-nat.service
+    content: |
+      [Unit]
+      Description=Lab NAT masquerade rules
+      After=network-online.target
+      Wants=network-online.target
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      ExecStart=/usr/sbin/nft -f /etc/nftables-nat.conf
+      ExecStop=/usr/sbin/nft delete table ip nat
+      [Install]
+      WantedBy=multi-user.target
+runcmd:
+  - [sysctl, --system]
+  - [systemctl, daemon-reload]
+  - [systemctl, enable, --now, lab-nat.service]

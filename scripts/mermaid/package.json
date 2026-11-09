@@ -7,7 +7,10 @@
     "validate": "node validate-mermaid.mjs"
   },
   "dependencies": {
-    "jsdom": "26.1.0",
-    "mermaid": "11.12.1"
+    "jsdom": "31.0.0",
+    "mermaid": "12.3.0"
+  },
+  "engines": {
+    "node": ">=22.22.2"
   }
 }

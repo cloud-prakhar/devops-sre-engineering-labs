@@ -1,0 +1,5 @@
+aws_region              = "us-east-1"
+owner                   = "your-name"
+bucket_prefix           = "dsel-tfstate"
+noncurrent_version_days = 30
+force_destroy           = false # set true only for final cleanup (deletes all state versions)

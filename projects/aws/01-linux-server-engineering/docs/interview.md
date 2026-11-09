@@ -117,7 +117,7 @@ stateDiagram-v2
 **Walkthrough:** the `auto_restart → failed` edge is the safety valve. Without it a broken config
 restarts forever, flooding logs and hiding the first error.
 
-**Depth:** sandbox options used in [taskboard.service](../files/taskboard.service): `ProtectSystem=strict`
+**Depth:** sandbox options used in [taskboard.service](../../../../shared/linux-service/taskboard.service): `ProtectSystem=strict`
 (whole FS read-only) + `StateDirectory=taskboard` (one writable, owned directory),
 `CapabilityBoundingSet=` (no capabilities), `NoNewPrivileges` (setuid binaries cannot elevate),
 `SystemCallFilter=@system-service`, `RestrictAddressFamilies`, `MemoryMax=300M`. `systemd-analyze security`

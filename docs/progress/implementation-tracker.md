@@ -22,8 +22,8 @@ deploy come from the catalog's `validation` fields.
 | aws-01 | [Linux Server Engineering](../../projects/aws/01-linux-server-engineering/) | fits | implemented | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ passed | n/a | ⏳ not tested |
 | aws-02 | [Dockerized Application on Cloud VM](../../projects/aws/02-dockerized-app-on-vm/) | fits | implemented | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ passed | ✅ passed | ⏳ not tested |
 | aws-03 | [Multi-Service Docker Application](../../projects/aws/03-multi-service-docker-app/) | fits | implemented | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ passed | ✅ passed | ⏳ not tested |
-| aws-04 | Terraform Networking Foundations | partial | planned | — | — | — | — | — | — | — | — | — | — | — |
-| aws-05 | Highly Available Server Application | partial | planned | — | — | — | — | — | — | — | — | — | — | — |
+| aws-04 | [Terraform Networking Foundations](../../projects/aws/04-terraform-networking-foundations/) | fits | implemented | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ passed | n/a | ⏳ not tested |
+| aws-05 | [Highly Available Server Application](../../projects/aws/05-highly-available-server-app/) | partial | implemented | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ passed | n/a | ⏳ not tested |
 | aws-06 | Secure CI/CD and Container Registry | partial | planned | — | — | — | — | — | — | — | — | — | — | — |
 | aws-07 | Managed Kubernetes Foundations | no | planned | — | — | — | — | — | — | — | — | — | — | — |
 | aws-08 | Kubernetes Networking and Autoscaling | no | planned | — | — | — | — | — | — | — | — | — | — | — |
@@ -118,3 +118,46 @@ owner's approval), so cloud-init on a real instance, `deploy.sh` and `verify.sh`
 
 **Next:** deploy-test AWS 01–03 in a lab account (record results in the catalog's
 `deployment_record`), then AWS 04.
+
+### 2026-11-09 (session 2) — AWS 04, AWS 05, dependency upgrade
+
+**Implemented:** AWS 04 Terraform Networking Foundations (bootstrap state bucket + network stack, shared
+`vpc` module with `nat_mode` none/instance/gateway) and AWS 05 Highly Available Server Application
+(ALB + Auto Scaling group across 2 AZs + single-AZ RDS PostgreSQL, write-only secrets). New concept
+guides: VPC design, Terraform state and locking, load balancing and autoscaling. Shared additions:
+`shared/linux-service/` (moved from AWS 01), `shared/scripts/tf-init-backend.sh`, `lab-host` options for
+private hosts.
+
+**Upgraded to latest versions (owner request):** Python 3.14 (image `python:3.14-slim-trixie`; deadsnakes
+`python3.14` on Ubuntu 24.04 hosts), NGINX 1.31, PostgreSQL 18 (Compose volume moved to
+`/var/lib/postgresql` for the 18 data layout), Alpine 3.23, `httpx` → `httpx2` 2.16.0, Terraform 1.17.1 in
+CI, mermaid 12.3.0 + jsdom 31.0.0 (Node ≥ 22.22, CI Node 26), hadolint v2.15.1, shellcheck v0.11.0,
+trivy 0.76.2, lychee 0.24.2, yamllint 1.38.0, GitHub Actions checkout/setup-python/setup-node v7,
+cache v6, setup-terraform v4. Python packages were already at their latest releases.
+
+**Validation actually run (final results, all passed):**
+
+| Check | Result |
+|---|---|
+| `terraform validate` for all 6 stacks with Terraform 1.17.1 (container) and 1.15.6 (local) | passed |
+| tflint (6 stacks + 3 shared modules) | passed (after removing an unused data source and annotating render placeholders) |
+| trivy 0.76.2 config scan, HIGH/CRITICAL | passed (new AWS-0102 / AWS-0132 findings reviewed and ignored with written justification) |
+| cloud-init 26.2 schema for 6 rendered user-data documents, incl. AWS 05 offline render | passed |
+| `systemd-analyze verify` of the shared `taskboard.service` (now with `${TASKBOARD_HOST}`) | passed |
+| Python 3.14.10 from deadsnakes on Ubuntu 24.04: venv + `pip install -r requirements-dev.txt` + pytest | 5 passed |
+| ShellCheck v0.11.0 (all scripts), hadolint v2.15.1, yamllint, compose config, Mermaid (mermaid 12.3.0), links, catalog | passed |
+| API unit tests (Python 3.14, httpx2) | 5 passed, no deprecation warnings |
+| AWS 02 `local-test.sh` on Python 3.14 image | 14/14 passed |
+| AWS 03 `local-test.sh` on Python 3.14 / NGINX 1.31 / PostgreSQL 18 | 19/19 passed |
+
+**Bugs found by validation and fixed:** AWS 05 user data rendered `content: null` for the empty
+`app/__init__.py` (would have failed on real instances) — package docstring added and a 14 KB gzipped
+user-data size guard added to `validate.sh`; `validate.sh` leaked "undeclared variable" warnings into
+rendered user data; trivy ignore for AWS-0132 was on the wrong resource.
+
+**Not run / needs cloud credentials and approval:** `terraform plan/apply` for any lab. Unverified until
+deployed: deadsnakes PPA through cloud-init on EC2, RDS PostgreSQL 18 on db.t4g.micro in the chosen
+region, AWS 05 boot time vs the 300 s health-check grace period, NAT instance masquerading, S3 native
+locking behaviour, every `verify.sh`.
+
+**Next:** AWS 06 Secure CI/CD and Container Registry (plan in CLAUDE.md).

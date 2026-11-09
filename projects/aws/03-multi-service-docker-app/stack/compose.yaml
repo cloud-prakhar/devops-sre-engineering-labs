@@ -71,7 +71,7 @@ services:
 
   db:
     <<: *hardening
-    image: postgres:17-alpine
+    image: postgres:18-alpine
     # Run directly as the image's postgres user (UID 70): the entrypoint then needs no root
     # privileges, so every capability can be dropped.
     user: "70:70"
@@ -79,10 +79,11 @@ services:
       POSTGRES_USER: taskboard
       POSTGRES_DB: taskboard
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
-      PGDATA: /var/lib/postgresql/data/pgdata
     secrets: [db_password]
     volumes:
-      - pg-data:/var/lib/postgresql/data
+      # PostgreSQL 18 images keep data in /var/lib/postgresql/<major>/docker, so the volume is
+      # mounted one level up. A future major upgrade then gets its own directory side by side.
+      - pg-data:/var/lib/postgresql
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=16m
       - /var/run/postgresql:rw,noexec,nosuid,size=1m,uid=70,gid=70,mode=0775

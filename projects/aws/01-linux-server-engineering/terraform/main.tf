@@ -9,10 +9,10 @@ locals {
     sshd_hardening    = filebase64("${path.module}/../files/10-lab-hardening.conf")
     journald          = filebase64("${path.module}/../files/journald-lab.conf")
     unattended        = filebase64("${path.module}/../files/52-lab-unattended-upgrades")
-    taskboard_service = filebase64("${path.module}/../files/taskboard.service")
+    taskboard_service = filebase64("${path.module}/../../../../shared/linux-service/taskboard.service")
     host_audit        = filebase64("${path.module}/../files/host-audit.sh")
     lab_fault         = filebase64("${path.module}/../files/lab-fault.sh")
-    install_taskboard = filebase64("${path.module}/../files/install-taskboard.sh")
+    install_taskboard = filebase64("${path.module}/../../../../shared/linux-service/install-taskboard.sh")
   }
 }
 
