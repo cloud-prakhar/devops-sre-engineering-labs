@@ -1,5 +1,5 @@
 # TLS-terminating reverse proxy for the Taskboard stack.
-FROM nginxinc/nginx-unprivileged:1.28-alpine
+FROM nginxinc/nginx-unprivileged:1.31-alpine
 USER root
 # openssl generates the lab's self-signed certificate at start-up (see 15-self-signed-cert.sh).
 RUN apk add --no-cache openssl \
