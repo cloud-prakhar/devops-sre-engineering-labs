@@ -1,0 +1,10 @@
+# Values used only by scripts/validate.sh to lint and render every template.
+image:
+  repository: 123456789012.dkr.ecr.us-east-1.amazonaws.com/lab06/taskboard-api
+  digest: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+version: ci
+autoscaling:
+  enabled: true
+ingress:
+  enabled: true
+  inboundCidrs: 203.0.113.10/32

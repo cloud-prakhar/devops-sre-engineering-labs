@@ -171,6 +171,10 @@ terraform -chdir=terraform apply lab07.tfplan                       # ≈ 15-20 
 | `node_instance_type` | `t3.small` | 11 pods per node; `c7i-flex.large` for 29 |
 | `node_capacity_type` | `ON_DEMAND` | `SPOT` to save more, with interruptions |
 | `admin_principal_arn` | caller | The role ARN that gets cluster admin |
+| `enable_network_policy` | `true` | VPC CNI enforces NetworkPolicy (used by AWS 08/09) |
+
+Continuing with AWS 08 and 09 on the same cluster? Set `node_count = 3`: Argo CD (AWS 09) and the load
+balancer controller (AWS 08) need room beyond the 11 pods a t3.small can hold.
 
 ### 3. Connect
 

@@ -1,0 +1,20 @@
+# Taskboard in namespace taskboard-prod. Changes here are synced by a human (scripts/sync-prod.sh).
+# Promote what dev runs with: scripts/promote.sh prod --from dev
+image:
+  repository: 000000000000.dkr.ecr.us-east-1.amazonaws.com/lab06/taskboard-api
+  digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+version: initial
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 4
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+config:
+  DATABASE_URL: sqlite:////data/taskboard.db
+  LOG_LEVEL: INFO
+ingress:
+  # Set to true with your CIDR to put prod behind an ALB (needs AWS 08's controller; billed).
+  enabled: false
+  inboundCidrs: ""

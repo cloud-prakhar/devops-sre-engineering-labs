@@ -57,6 +57,16 @@ wait_for_ssh() {
   done
 }
 
+# latest_ecr_image [repository] -> prints <repo-uri>@<digest> of the newest image (AWS 06's repository by default)
+latest_ecr_image() {
+  local repo=${1:-lab06/taskboard-api} digest url
+  digest=$(aws ecr describe-images --repository-name "$repo" \
+    --query 'sort_by(imageDetails,&imagePushedAt)[-1].imageDigest' --output text 2>/dev/null) || return 1
+  [[ "$digest" == sha256:* ]] || return 1
+  url=$(aws ecr describe-repositories --repository-names "$repo" --query 'repositories[0].repositoryUri' --output text)
+  echo "$url@$digest"
+}
+
 finish() {
   if (( LAB_FAILURES > 0 )); then
     printf '\n%s%d check(s) failed.%s\n' "$C_RED" "$LAB_FAILURES" "$C_OFF"

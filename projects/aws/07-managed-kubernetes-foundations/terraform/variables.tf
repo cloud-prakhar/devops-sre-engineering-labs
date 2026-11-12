@@ -87,3 +87,9 @@ variable "control_plane_log_types" {
   type        = list(string)
   default     = []
 }
+
+variable "enable_network_policy" {
+  description = "Enable the VPC CNI network policy agent so Kubernetes NetworkPolicy objects are enforced (AWS 08)."
+  type        = bool
+  default     = true
+}

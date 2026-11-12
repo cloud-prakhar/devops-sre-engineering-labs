@@ -1,0 +1,34 @@
+# Guard rails for everything the ApplicationSet creates: one source repository, two namespaces, and no
+# cluster-scoped resources except the Namespaces themselves.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: taskboard
+  namespace: argocd
+spec:
+  description: Taskboard environments (AWS 09)
+  sourceRepos:
+    - {{ required "repoURL is required" .Values.repoURL | quote }}
+  destinations:
+    {{- range .Values.environments }}
+    - server: https://kubernetes.default.svc
+      namespace: {{ printf "taskboard-%s" .name }}
+    {{- end }}
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: ""
+      kind: ConfigMap
+    - group: ""
+      kind: Service
+    - group: apps
+      kind: Deployment
+    - group: autoscaling
+      kind: HorizontalPodAutoscaler
+    - group: policy
+      kind: PodDisruptionBudget
+    - group: networking.k8s.io
+      kind: NetworkPolicy
+    - group: networking.k8s.io
+      kind: Ingress

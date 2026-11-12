@@ -39,6 +39,9 @@ A multi-cloud DevOps/SRE learning platform: 15 themes × 3 clouds = 45 projects,
 | `docs/concepts/` | Reusable concept guides (7-part structure) |
 | `.github/workflows/aws-06-delivery.yml` | AWS 06 pipeline (lives at repo level because GitHub only reads workflows there); release/deploy only on `workflow_dispatch` + `vars.AWS06_ENABLED == 'true'` + environment `aws-06-lab` |
 | `projects/aws/07-*/k8s/` | Kustomize bases (`base/`, `aws/`); `k8s/.generated/` is the git-ignored deploy overlay |
+| `projects/aws/08-*/k8s/` | Kustomization that reuses AWS 07's base + Ingress/HPA/PDB/NetworkPolicies; `drills/` holds standalone drill manifests |
+| `shared/helm-charts/taskboard/` | Helm chart of the app (AWS 09+); `ci/test-values.yaml` for linting; schema allows digests only |
+| `projects/aws/09-*/gitops/root/` | App-of-apps Helm chart (AppProject + ApplicationSet); `environments/<env>/values.yaml` is what runs |
 | `scripts/` | `validate.sh`, `catalog.py`, `check-links.py`, `mermaid/` |
 
 ## Conventions that are easy to get wrong
@@ -69,13 +72,18 @@ A multi-cloud DevOps/SRE learning platform: 15 themes × 3 clouds = 45 projects,
   kustomize forbids absolute paths, so generated overlays live inside the repo (git-ignored).
 - The environment blocks downloading and executing arbitrary binaries (e.g. the kind CLI); ask the owner
   before relying on one.
+- Resources created by Kubernetes controllers (ALBs, target groups, security groups, later EBS volumes)
+  are not in Terraform state: tag them (`Repository`/`Project` via annotations or StorageClass
+  parameters) and document delete-workloads-before-cluster cleanup order.
+- Argo CD objects must carry `resources-finalizer.argocd.argoproj.io` so deleting them cascades; never
+  create Argo CD CRs with `kubernetes_manifest` in the same apply that installs Argo CD.
 - `.github/workflows/external-links.yml` is **manual only** (`workflow_dispatch`) by owner decision — do not add a `schedule` trigger.
 
 ## Validation commands
 
 ```bash
 scripts/validate.sh                       # all groups; Docker fallbacks for missing linters
-scripts/validate.sh <group>               # terraform cloudinit shell docker yaml workflows kubernetes compose mermaid links catalog app secrets
+scripts/validate.sh <group>               # terraform cloudinit shell docker yaml workflows kubernetes helm compose mermaid links catalog app secrets
 python3 scripts/catalog.py validate       # structure of implemented projects + catalog consistency
 python3 scripts/catalog.py tracker --write
 projects/aws/02-dockerized-app-on-vm/scripts/local-test.sh
@@ -92,35 +100,39 @@ Owner instruction (2026-11-09): use the latest available versions, Python 3.14 f
 
 | Item | Version |
 |---|---|
-| Terraform | CI 1.17.1 (also validated locally with 1.15.6); `required_version` ≥ 1.9 (AWS 01–03), ≥ 1.10 (AWS 04, `use_lockfile`), ≥ 1.11 (AWS 05, write-only args); AWS provider `>= 6.0, < 7.0`, lock files at 6.72.0 |
+| Terraform | CI 1.17.1 (also validated locally with 1.15.6); `required_version` ≥ 1.9 (AWS 01–03), ≥ 1.10 (AWS 04, `use_lockfile`), ≥ 1.11 (AWS 05, write-only args); AWS provider `>= 6.0, < 7.0` (lock files 6.73.0, 2026-11-12); Helm provider `>= 3.3, < 4` (AWS 09) |
 | Python | 3.14 (image `python:3.14-slim-trixie`; on Ubuntu 24.04 hosts `python3.14` from the deadsnakes PPA) |
 | Python deps | fastapi 0.162.2, uvicorn 0.54.0, psycopg[binary] 3.3.8, prometheus-client 0.26.0; dev: pytest 9.2.0, httpx2 2.16.0 |
 | Images | `python:3.14-slim-trixie`, `nginxinc/nginx-unprivileged:1.31-alpine`, `postgres:18-alpine` (data under `/var/lib/postgresql/18/docker`), `alpine:3.23`, `node:26-alpine` |
 | RDS | PostgreSQL major `18` (variable; fall back to 17 where not offered), db.t4g.micro |
-| Linters (Docker) | hadolint v2.15.1, shellcheck v0.11.0, trivy 0.76.2, gitleaks v8.30.1, tflint v0.66.0, lychee 0.24.2, actionlint 1.7.12, kubeconform v0.8.0 (schemas 1.37.0); yamllint 1.38.0 |
+| Linters (Docker) | hadolint v2.15.1, shellcheck v0.11.0, trivy 0.76.2, gitleaks v8.30.1, tflint v0.66.0, lychee 0.24.2, actionlint 1.7.12, kubeconform v0.8.0 (schemas 1.37.0; CRDs from datreeio/CRDs-catalog), helm 4.3 (`alpine/helm:4.3.0` fallback); yamllint 1.38.0 |
 | Kubernetes | EKS 1.37 (default/newest standard support on 2026-11-09 per `aws eks describe-cluster-versions`); add-ons resolved with `aws_eks_addon_version most_recent`; kind v0.33.0 / `kindest/node:v1.37.0` is the candidate local cluster (not yet allowed in this environment) |
+| Kubernetes add-ons via Helm | AWS Load Balancer Controller chart 3.6.2 (v3.6.2; IAM policy vendored in AWS 08 `terraform/policies/`), argo-cd chart 10.18.0 (Argo CD v3.6.1), argocd-apps chart 2.0.8 |
 | AWS 06 pipeline actions | configure-aws-credentials v6, amazon-ecr-login v2, attest-build-provenance v4, attest-sbom v4, upload-artifact v7; trivy run from its image, never a third-party action |
 | Mermaid validation | mermaid 12.3.0 + jsdom 31.0.0 (needs Node ≥ 22.22; `validate.sh` falls back to `node:26-alpine`) |
 | GitHub Actions | checkout v7, setup-python v7, setup-node v7, cache v6, setup-terraform v4; Python 3.14, Node 26 |
 
 ## Continuing the roadmap
 
-Current state: Phase 0 done; AWS 01–07 implemented (static checks passed; AWS 02, 03, 06 local tests
-passed; **none deployed**). Read-only AWS checks done on 2026-11-09: RDS PostgreSQL 18 (up to 18.6) is
+Current state: Phase 0 done; AWS 01–09 implemented (static checks passed; AWS 02, 03, 06, 09 local tests
+passed; **none deployed**). On GitHub, the `aws-06-delivery` verify job (tests, build, trivy gate, SBOM)
+has passed; its release/deploy jobs have not run. Read-only AWS checks done on 2026-11-09: RDS PostgreSQL 18 (up to 18.6) is
 orderable on db.t4g.micro in us-east-1; this account's free-tier-eligible types are t3.micro, t3.small,
 t4g.micro, t4g.small, t8i.micro, t8i.small, c7i-flex.large, m7i-flex.large (no t2.micro).
 
 Next steps, in order:
 
-1. With the owner's approval, deploy-test AWS 01–07 (`apply` → `deploy.sh`/boot → `verify.sh` →
+1. With the owner's approval, deploy-test AWS 01–09 (`apply` → `deploy.sh`/boot → `verify.sh` →
    `destroy`), fix what breaks, record `deployment_record`s. Highest-risk untested parts: deadsnakes
    PPA via cloud-init, AWS 05 boot within the 300 s grace period, NAT instance masquerading (AWS 04, 07),
-   the AWS 06 workflow on GitHub (OIDC trust, attestations push to ECR), EKS add-on ordering (AWS 07).
-2. AWS 08 Kubernetes networking and autoscaling on the AWS 07 cluster: AWS Load Balancer Controller via
-   Pod Identity (Helm), Ingress (ALB, billed — document cost), HPA on metrics-server, PDBs, NetworkPolicy
-   (VPC CNI network policy agent: `enableNetworkPolicy` in the vpc-cni add-on configuration), rolling
-   updates. Reuse `k8s/base` and extend with overlays rather than copying manifests.
-3. AWS 09–15.
+   the AWS 06 release/deploy jobs (OIDC trust, attestations push to ECR), EKS add-on ordering and the
+   vpc-cni `enableNetworkPolicy` configuration (AWS 07), ALB health checks through NetworkPolicy (AWS 08),
+   Argo CD multi-source `$values` + `templatePatch` on a live cluster (AWS 09).
+2. AWS 10 Stateful workloads on the AWS 07 cluster: EBS CSI driver add-on (Pod Identity), gp3
+   StorageClass, PostgreSQL StatefulSet for Taskboard (the chart gains a `postgresql` mode instead of
+   per-pod SQLite), VolumeSnapshots (snapshot CRDs/controller), backup to S3 and restore drill. EBS
+   volumes created by Kubernetes are outside Terraform: tag them and add them to cleanup checks.
+3. AWS 11–15.
 4. For each new lab: copy `docs/templates/project-readme.md`, meet the definition of done in
    CONTRIBUTING.md, update the catalog (`status`, `path`, `validation`), regenerate the tracker,
    add questions to `docs/interview-preparation/README.md`.

@@ -9,3 +9,4 @@ node_instance_type      = "t3.small"
 node_capacity_type      = "ON_DEMAND"         # "SPOT" is cheaper but interruptible
 node_count              = 2
 control_plane_log_types = []
+enable_network_policy   = true # VPC CNI enforces NetworkPolicy (needed by AWS 08)

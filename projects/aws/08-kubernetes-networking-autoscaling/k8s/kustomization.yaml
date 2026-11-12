@@ -1,0 +1,31 @@
+# AWS 08 = AWS 07's base (namespace, RBAC, Taskboard) + traffic, scaling and isolation objects.
+# scripts/deploy-workloads.sh adds the image digest and your CIDR in a generated overlay on top of this.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../07-managed-kubernetes-foundations/k8s/base
+  - ingress.yaml
+  - hpa.yaml
+  - pdb.yaml
+  - networkpolicy.yaml
+patches:
+  # The HPA owns the replica count. If the Deployment also declared "replicas", every kubectl apply
+  # would reset it to 2 and fight the autoscaler.
+  - target:
+      kind: Deployment
+      name: taskboard
+    patch: |-
+      - op: remove
+        path: /spec/replicas
+  # Zero-downtime rollouts: add one new pod before removing an old one, never drop below capacity.
+  - target:
+      kind: Deployment
+      name: taskboard
+    patch: |-
+      - op: add
+        path: /spec/strategy
+        value:
+          type: RollingUpdate
+          rollingUpdate:
+            maxSurge: 1
+            maxUnavailable: 0

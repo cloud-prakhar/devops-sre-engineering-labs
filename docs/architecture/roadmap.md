@@ -42,6 +42,8 @@ flowchart LR
 | OIDC pipeline, ECR repository, digests + provenance | AWS 06 | AWS 07 deploys the AWS 06 digest; GitOps in AWS 09 |
 | EKS cluster (access entries, Pod Identity, add-ons) | AWS 07 | AWS 08–15 |
 | Hardened pod spec + `restricted` namespace | AWS 07 | every Kubernetes lab |
+| AWS Load Balancer Controller (Pod Identity), NetworkPolicy enforcement | AWS 08 | AWS 09–15 Ingress and isolation |
+| Taskboard Helm chart, Argo CD app-of-apps, promotion by commit | AWS 09 | AWS 10–15 deliver through GitOps |
 | Docker host cloud-init | AWS 02 | AWS 03 |
 | Hardened container profile | AWS 02 | AWS 03 Compose anchor → Kubernetes `securityContext` in 08 |
 | Health-gated rollout + rollback | AWS 02 | ALB health checks (05), Kubernetes rolling updates (08), Argo CD (09) |

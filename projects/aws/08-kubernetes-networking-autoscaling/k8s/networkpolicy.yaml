@@ -1,0 +1,92 @@
+# Enforced by the VPC CNI network policy agent (AWS 07: enable_network_policy = true).
+# Model: deny everything in the namespace, then allow exactly the flows the app needs.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: taskboard
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+# Every pod may resolve names through CoreDNS.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: taskboard
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# The ALB (target-type ip) connects to pods from its ENIs in the public subnets of the AWS 07 VPC
+# (10.70.0.0/24 and 10.70.1.0/24), for both traffic and health checks.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-alb-to-taskboard
+  namespace: taskboard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: taskboard
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 10.70.0.0/23
+      ports:
+        - protocol: TCP
+          port: 8000
+---
+# The load-generator drill (k8s/drills) may call the Service; nothing else in the cluster may.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-load-generator-to-taskboard
+  namespace: taskboard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: taskboard
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: load-generator
+      ports:
+        - protocol: TCP
+          port: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: load-generator-egress
+  namespace: taskboard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: load-generator
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: taskboard
+      ports:
+        - protocol: TCP
+          port: 8000

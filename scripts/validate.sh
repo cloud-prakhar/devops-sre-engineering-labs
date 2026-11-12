@@ -4,7 +4,7 @@
 #
 #   scripts/validate.sh                 all groups
 #   scripts/validate.sh terraform shell one or more groups:
-#     terraform cloudinit shell docker yaml workflows kubernetes compose mermaid links catalog app secrets
+#     terraform cloudinit shell docker yaml workflows kubernetes helm compose mermaid links catalog app secrets
 set -uo pipefail
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$ROOT" || exit 1
@@ -18,6 +18,8 @@ ACTIONLINT_IMAGE=rhysd/actionlint:1.7.12
 KUBECONFORM_IMAGE=ghcr.io/yannh/kubeconform:v0.8.0
 KUBECTL_IMAGE=registry.k8s.io/kubectl:v1.37.0
 K8S_SCHEMA_VERSION=1.37.0
+HELM_IMAGE=alpine/helm:4.3.0
+CRD_SCHEMAS='https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
 PYTHON_IMAGE=python:3.14-slim-trixie
 NODE_IMAGE=node:26-alpine
 
@@ -104,11 +106,47 @@ run_kubernetes() {
     else docker run --rm -v "$ROOT:/repo:ro" -w /repo "$KUBECTL_IMAGE" kustomize "$dir" > "$out/$name.yaml" || ok=1; fi
     echo "rendered: $dir"
   done < <(find projects -name kustomization.yaml -not -path '*/.generated/*' | sort)
+  # Standalone manifests applied by drills (not part of a kustomization).
+  while read -r f; do cp "$f" "$out/drill_$(echo "$f" | tr '/' '_')"; echo "drill manifest: $f"; done \
+    < <(find projects -path '*/k8s/drills/*.yaml' | sort)
   if ls "$out"/*.yaml >/dev/null 2>&1; then
     docker run --rm -v "$out:/m:ro" "$KUBECONFORM_IMAGE" -strict -summary -kubernetes-version "$K8S_SCHEMA_VERSION" /m || ok=1
   fi
   rm -rf "$out"
   record kubernetes "$ok"
+}
+
+run_helm() {
+  section "helm: lint + template every chart (CI values and each environment) + kubeconform"
+  local ok=0 chart vf out name
+  out=$(mktemp -d)
+  hc() { if have helm; then helm "$@"; else docker run --rm -v "$ROOT:/apps" -w /apps "$HELM_IMAGE" "$@"; fi; }
+  for chart in shared/helm-charts/*/; do
+    chart=${chart%/}
+    # The chart's own CI values plus every environment values file in the labs (all target this chart today).
+    for vf in "$chart/ci/test-values.yaml" $(find projects -path '*/environments/*/values.yaml' | sort); do
+      [[ -f "$vf" ]] || continue
+      name=$(echo "$chart-$vf" | tr '/.' '__')
+      if hc lint "$chart" -f "$vf" --quiet >/dev/null && hc template t "$chart" -f "$vf" --namespace lint > "$out/$name.yaml"; then
+        echo "ok: $chart with $vf"
+      else
+        echo "FAILED: $chart with $vf"; hc lint "$chart" -f "$vf"; ok=1
+      fi
+    done
+  done
+  for chart in $(find projects -path '*/gitops/*/Chart.yaml' -exec dirname {} \; | sort); do
+    name=$(echo "$chart" | tr '/.' '__')
+    if hc lint "$chart" --set repoURL=https://github.com/example/repo.git --quiet >/dev/null \
+       && hc template root "$chart" --set repoURL=https://github.com/example/repo.git > "$out/$name.yaml"; then
+      echo "ok: $chart"
+    else
+      echo "FAILED: $chart"; ok=1
+    fi
+  done
+  docker run --rm -v "$out:/m:ro" "$KUBECONFORM_IMAGE" -strict -summary -kubernetes-version "$K8S_SCHEMA_VERSION" \
+    -schema-location default -schema-location "$CRD_SCHEMAS" /m || ok=1
+  rm -rf "$out"
+  record helm "$ok"
 }
 
 run_compose() {
@@ -245,10 +283,10 @@ run_secrets() {
 }
 
 groups=("$@")
-[[ ${#groups[@]} -eq 0 ]] && groups=(terraform cloudinit shell docker yaml workflows kubernetes compose mermaid links catalog app secrets)
+[[ ${#groups[@]} -eq 0 ]] && groups=(terraform cloudinit shell docker yaml workflows kubernetes helm compose mermaid links catalog app secrets)
 for g in "${groups[@]}"; do
   case "$g" in
-    terraform|cloudinit|shell|docker|yaml|workflows|kubernetes|compose|mermaid|links|catalog|app|secrets) "run_$g" ;;
+    terraform|cloudinit|shell|docker|yaml|workflows|kubernetes|helm|compose|mermaid|links|catalog|app|secrets) "run_$g" ;;
     *) echo "unknown group: $g"; exit 2 ;;
   esac
 done

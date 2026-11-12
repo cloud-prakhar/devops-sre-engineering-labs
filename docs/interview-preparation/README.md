@@ -59,12 +59,26 @@ Being able to **draw the diagram from memory** is the best sign you understand t
 | Kubernetes / IAM | [How should a pod get AWS permissions, and what is wrong with using the node role?](../../projects/aws/07-managed-kubernetes-foundations/docs/interview.md#q5-advanced--how-should-a-pod-get-aws-permissions-and-what-is-wrong-with-using-the-node-role) | Advanced | AWS 07 |
 | Kubernetes / incident | [Pods are stuck in `Pending` after a deployment scaled up. Diagnose it.](../../projects/aws/07-managed-kubernetes-foundations/docs/interview.md#q6-scenario--pods-are-stuck-in-pending-after-a-deployment-scaled-up-diagnose-it) | Scenario | AWS 07 |
 | Kubernetes / cost | [Your manager asks why the Kubernetes bill is higher than the old VMs. Break it down and cut it.](../../projects/aws/07-managed-kubernetes-foundations/docs/interview.md#q7-scenario--your-manager-asks-why-the-kubernetes-bill-is-higher-than-the-old-vms-break-it-down-and-cut-it) | Scenario | AWS 07 |
+| Kubernetes networking | [ClusterIP, NodePort, LoadBalancer, Ingress: when do you use each?](../../projects/aws/08-kubernetes-networking-autoscaling/docs/interview.md#q1-beginner--clusterip-nodeport-loadbalancer-ingress-when-do-you-use-each) | Beginner | AWS 08 |
+| Kubernetes / AWS | [Explain `target-type: ip` vs `instance` on the AWS Load Balancer Controller.](../../projects/aws/08-kubernetes-networking-autoscaling/docs/interview.md#q2-intermediate--explain-target-type-ip-vs-instance-on-the-aws-load-balancer-controller) | Intermediate | AWS 08 |
+| Kubernetes autoscaling | [How does the HPA decide how many replicas to run?](../../projects/aws/08-kubernetes-networking-autoscaling/docs/interview.md#q3-intermediate--how-does-the-hpa-decide-how-many-replicas-to-run) | Intermediate | AWS 08 |
+| Kubernetes security | [Design NetworkPolicies for a namespace. What goes wrong most often?](../../projects/aws/08-kubernetes-networking-autoscaling/docs/interview.md#q4-advanced--design-networkpolicies-for-a-namespace-what-goes-wrong-most-often) | Advanced | AWS 08 |
+| Kubernetes / delivery | [How do you get zero-downtime deployments and node maintenance on Kubernetes?](../../projects/aws/08-kubernetes-networking-autoscaling/docs/interview.md#q5-intermediate--how-do-you-get-zero-downtime-deployments-and-node-maintenance-on-kubernetes) | Intermediate | AWS 08 |
+| Kubernetes / incident | [After a change, the ALB returns 502 for every request but all pods are Running and Ready. Debug it.](../../projects/aws/08-kubernetes-networking-autoscaling/docs/interview.md#q6-scenario--after-a-change-the-alb-returns-502-for-every-request-but-all-pods-are-running-and-ready-debug-it) | Scenario | AWS 08 |
+| Kubernetes / cost | [Kubernetes created an ALB. Who owns it, and how do you avoid leaks and surprises?](../../projects/aws/08-kubernetes-networking-autoscaling/docs/interview.md#q7-advanced--kubernetes-created-an-alb-who-owns-it-and-how-do-you-avoid-leaks-and-surprises) | Advanced | AWS 08 |
+| GitOps | [What is GitOps, and how is it different from a CI pipeline running `kubectl apply`?](../../projects/aws/09-helm-argocd-gitops/docs/interview.md#q1-beginner--what-is-gitops-and-how-is-it-different-from-a-ci-pipeline-running-kubectl-apply) | Beginner | AWS 09 |
+| GitOps / Argo CD | [Explain Argo CD's architecture. What happens between a commit and running pods?](../../projects/aws/09-helm-argocd-gitops/docs/interview.md#q2-intermediate--explain-argo-cds-architecture-what-happens-between-a-commit-and-running-pods) | Intermediate | AWS 09 |
+| Helm | [How do you manage multiple environments with one Helm chart?](../../projects/aws/09-helm-argocd-gitops/docs/interview.md#q3-intermediate--how-do-you-manage-multiple-environments-with-one-helm-chart) | Intermediate | AWS 09 |
+| GitOps / Terraform | [How do you bootstrap Argo CD with Terraform without a chicken-and-egg problem?](../../projects/aws/09-helm-argocd-gitops/docs/interview.md#q4-advanced--how-do-you-bootstrap-argo-cd-with-terraform-without-a-chicken-and-egg-problem) | Advanced | AWS 09 |
+| GitOps / incident | [A bad release reached production through GitOps. How do you roll back, and what must you not do?](../../projects/aws/09-helm-argocd-gitops/docs/interview.md#q5-scenario--a-bad-release-reached-production-through-gitops-how-do-you-roll-back-and-what-must-you-not-do) | Scenario | AWS 09 |
+| GitOps security | [How do you secure Argo CD itself?](../../projects/aws/09-helm-argocd-gitops/docs/interview.md#q6-advanced--how-do-you-secure-argo-cd-itself) | Advanced | AWS 09 |
+| GitOps / incident | [During an incident, an engineer scales the prod Deployment by hand and Argo CD keeps putting it back. What is the right process?](../../projects/aws/09-helm-argocd-gitops/docs/interview.md#q7-scenario--during-an-incident-an-engineer-scales-the-prod-deployment-by-hand-and-argo-cd-keeps-putting-it-back-what-is-the-right-process) | Scenario | AWS 09 |
 
 ## By cloud
 
 | Cloud | Labs with questions | Count |
 |---|---|---|
-| AWS | 01–07 | 49 |
+| AWS | 01–09 | 63 |
 | Azure | — (planned) | 0 |
 | GCP | — (planned) | 0 |
 
@@ -75,10 +89,10 @@ groups, SSH builds vs ECR, VPC/NAT design, ALB + Auto Scaling, RDS secrets.
 
 | Level | Questions |
 |---|---|
-| Beginner | AWS 01 Q1 · AWS 02 Q1 · AWS 03 Q1 · AWS 04 Q1 · AWS 05 Q1 · AWS 06 Q1 · AWS 07 Q1 |
-| Intermediate | AWS 01 Q2, Q3 · AWS 02 Q2, Q3, Q5 · AWS 03 Q2, Q3, Q5 · AWS 04 Q2, Q3, Q4, Q5 · AWS 05 Q2, Q4 · AWS 06 Q2, Q3 · AWS 07 Q2, Q3 |
-| Advanced | AWS 01 Q4, Q7 · AWS 02 Q4, Q7 · AWS 03 Q4, Q7 · AWS 04 Q7 · AWS 05 Q3, Q5, Q7 · AWS 06 Q4, Q6 · AWS 07 Q4, Q5 |
-| Scenario | AWS 01 Q5, Q6 · AWS 02 Q6 · AWS 03 Q6 · AWS 04 Q6 · AWS 05 Q6 · AWS 06 Q5, Q7 · AWS 07 Q6, Q7 |
+| Beginner | AWS 01 Q1 · AWS 02 Q1 · AWS 03 Q1 · AWS 04 Q1 · AWS 05 Q1 · AWS 06 Q1 · AWS 07 Q1 · AWS 08 Q1 · AWS 09 Q1 |
+| Intermediate | AWS 01 Q2, Q3 · AWS 02 Q2, Q3, Q5 · AWS 03 Q2, Q3, Q5 · AWS 04 Q2, Q3, Q4, Q5 · AWS 05 Q2, Q4 · AWS 06 Q2, Q3 · AWS 07 Q2, Q3 · AWS 08 Q2, Q3, Q5 · AWS 09 Q2, Q3 |
+| Advanced | AWS 01 Q4, Q7 · AWS 02 Q4, Q7 · AWS 03 Q4, Q7 · AWS 04 Q7 · AWS 05 Q3, Q5, Q7 · AWS 06 Q4, Q6 · AWS 07 Q4, Q5 · AWS 08 Q4, Q7 · AWS 09 Q4, Q6 |
+| Scenario | AWS 01 Q5, Q6 · AWS 02 Q6 · AWS 03 Q6 · AWS 04 Q6 · AWS 05 Q6 · AWS 06 Q5, Q7 · AWS 07 Q6, Q7 · AWS 08 Q6 · AWS 09 Q5, Q7 |
 
 ## Scenario drills (incident-style)
 
@@ -98,5 +112,9 @@ groups, SSH builds vs ECR, VPC/NAT design, ALB + Auto Scaling, RDS secrets.
 | Compromised pipeline pushed an image | AWS 06 Q7, exercise 7 (provenance) |
 | Pods stuck Pending (Too many pods) | AWS 07 exercise 2, Q6 |
 | Node lost: drain, reschedule, replace | AWS 07 exercise 9 |
+| ALB returns 502 while pods are Ready (NetworkPolicy) | AWS 08 drill break-policy, Q6 |
+| Drain blocked by a PodDisruptionBudget | AWS 08 exercise 5 |
+| Bad release in GitOps: roll back through Git only | AWS 09 exercise 7, Q5 |
+| Manual change keeps being reverted (self-heal) during an incident | AWS 09 Q7, exercise 5 |
 
 Roles and study plans: [learning paths → interview preparation](../learning-paths/README.md#interview-preparation).

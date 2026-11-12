@@ -10,13 +10,7 @@ source "$ROOT/shared/scripts/lib.sh"
 require_cmd kubectl terraform aws
 
 TF="$HERE/../terraform"
-if [[ -z "${IMAGE:-}" ]]; then
-  repo=lab06/taskboard-api
-  digest=$(aws ecr describe-images --repository-name "$repo" --query 'sort_by(imageDetails,&imagePushedAt)[-1].imageDigest' --output text 2>/dev/null) \
-    || die "no image found: run the AWS 06 pipeline first, or set IMAGE=<repo@sha256:...>"
-  url=$(aws ecr describe-repositories --repository-names "$repo" --query 'repositories[0].repositoryUri' --output text)
-  IMAGE="$url@$digest"
-fi
+IMAGE=${IMAGE:-$(latest_ecr_image)} || die "no image found: run the AWS 06 pipeline first, or set IMAGE=<repo@sha256:...>"
 [[ "$IMAGE" =~ @sha256:[0-9a-f]{64}$ ]] || die "IMAGE must be pinned by digest: $IMAGE"
 VERSION=${VERSION:-${IMAGE: -12}}
 

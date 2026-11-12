@@ -24,7 +24,9 @@ repeating the material.
 | Reliability | [Load balancing, health checks and autoscaling](load-balancing-and-autoscaling.md) | AWS 05 |
 | Delivery | [CI/CD supply-chain security: OIDC, digests, scanning, SBOM, provenance](cicd-supply-chain-security.md) | AWS 06–07 |
 | Kubernetes | [Kubernetes core concepts](kubernetes-core-concepts.md) | AWS 07 |
-| Kubernetes | [EKS access and identity: access entries, RBAC, Pod Identity](eks-access-and-identity.md) | AWS 07 |
+| Kubernetes | [EKS access and identity: access entries, RBAC, Pod Identity](eks-access-and-identity.md) | AWS 07–09 |
+| Kubernetes | [Traffic, isolation and scaling: Services, Ingress, NetworkPolicy, HPA, PDB](kubernetes-traffic-and-scaling.md) | AWS 08–09 |
+| Delivery | [Helm and GitOps with Argo CD](helm-and-gitops.md) | AWS 09 |
 
 New guides are added together with the first lab that needs them (observability and SRE guides arrive
 with AWS 11 and 14).

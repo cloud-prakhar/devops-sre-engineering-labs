@@ -1,0 +1,5 @@
+aws_region      = "us-east-1"
+owner           = "your-name"
+cluster_name    = "lab07-eks"
+repo_url        = "https://github.com/your-github-user/devops-sre-engineering-labs.git" # your fork
+target_revision = "main"

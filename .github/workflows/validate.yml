@@ -39,7 +39,7 @@ jobs:
       - run: scripts/validate.sh terraform cloudinit
 
   lint:
-    name: Shell, Dockerfile, YAML, workflows, Kubernetes, Compose, Mermaid, links, catalog
+    name: Shell, Dockerfile, YAML, workflows, Kubernetes, Helm, Compose, Mermaid, links, catalog
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -55,7 +55,7 @@ jobs:
           cache: npm
           cache-dependency-path: scripts/mermaid/package-lock.json
       - run: pip install --disable-pip-version-check yamllint==1.38.0 pyyaml==6.0.3
-      - run: scripts/validate.sh shell docker yaml workflows kubernetes compose mermaid links catalog
+      - run: scripts/validate.sh shell docker yaml workflows kubernetes helm compose mermaid links catalog
 
   app:
     name: Taskboard unit tests

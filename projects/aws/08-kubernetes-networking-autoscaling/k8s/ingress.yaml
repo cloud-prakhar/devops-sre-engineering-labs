@@ -1,0 +1,32 @@
+# An internet-facing ALB created by the AWS Load Balancer Controller. target-type "ip" sends traffic
+# straight to pod IPs (VPC CNI), skipping NodePorts and kube-proxy.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: taskboard
+  namespace: taskboard
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/healthcheck-path: /readyz
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "10"
+    alb.ingress.kubernetes.io/healthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: "2"
+    alb.ingress.kubernetes.io/target-group-attributes: deregistration_delay.timeout_seconds=30
+    # Replaced with your CIDR by scripts/deploy-workloads.sh (203.0.113.0/24 is a documentation range).
+    alb.ingress.kubernetes.io/inbound-cidrs: 203.0.113.10/32
+    # Tags let shared/scripts/aws-find-lab-resources.sh find the ALB — Terraform does not own it.
+    alb.ingress.kubernetes.io/tags: Repository=devops-sre-engineering-labs,Project=aws-08-kubernetes-networking-autoscaling
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: taskboard
+                port:
+                  name: http

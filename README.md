@@ -5,7 +5,7 @@ Azure and Google Cloud**. Every lab is deployable code plus the material to unde
 Mermaid architectures, Architecture Decision Records, cost estimates, troubleshooting playbooks,
 failure drills and interview preparation.
 
-> **Status (2026-11-09):** 7 of 45 projects implemented (AWS 01–07). They pass static checks (and local
+> **Status (2026-11-12):** 9 of 45 projects implemented (AWS 01–09). They pass static checks (and local
 > container tests where applicable); **none has been deployed to a cloud account yet**. See the
 > [implementation tracker](docs/progress/implementation-tracker.md) for exact per-project status.
 
@@ -67,8 +67,8 @@ cloud in [catalog/projects.yaml](catalog/projects.yaml) and explained in
 | 05 | Highly Available Server Application | Intermediate | 5 h | [✅ implemented](projects/aws/05-highly-available-server-app/) · partial free tier | planned | planned |
 | 06 | Secure CI/CD and Container Registry | Intermediate | 5 h | [✅ implemented](projects/aws/06-secure-cicd-container-registry/) · free tier | planned | planned |
 | 07 | Managed Kubernetes Foundations | Intermediate | 6 h | [✅ implemented](projects/aws/07-managed-kubernetes-foundations/) · **billed** (EKS) | planned | planned |
-| 08 | Kubernetes Networking and Autoscaling | Intermediate | 6 h | planned | planned | planned |
-| 09 | Helm and Argo CD GitOps | Advanced | 6 h | planned | planned | planned |
+| 08 | Kubernetes Networking and Autoscaling | Intermediate | 6 h | [✅ implemented](projects/aws/08-kubernetes-networking-autoscaling/) · **billed** (EKS + ALB) | planned | planned |
+| 09 | Helm and Argo CD GitOps | Advanced | 6 h | [✅ implemented](projects/aws/09-helm-argocd-gitops/) · **billed** (EKS) | planned | planned |
 | 10 | Stateful Kubernetes Workloads | Advanced | 6 h | planned | planned | planned |
 | 11 | Prometheus, Grafana and Alertmanager | Advanced | 6 h | planned | planned | planned |
 | 12 | Centralized Logging with Elastic Stack | Advanced | 6 h | planned | planned | planned |
@@ -93,6 +93,7 @@ Build times are first attempts including exercises. Rebuilds take 15–30 minute
 |---|---|---|
 | Terraform | ≥ 1.9 (AWS 04: ≥ 1.10, AWS 05: ≥ 1.11); tested 1.15.6 and 1.17.1 | All cloud labs |
 | AWS CLI v2 | current | AWS labs, preflight, cleanup check |
+| Helm | v3.14+ or v4 (tested 4.3.0) | AWS 08–09, `validate.sh helm` |
 | Docker Engine + Compose v2 | Engine ≥ 25 (tested 29.1, Compose 5.1) | Labs 02+, local tests, linters |
 | OpenSSH client, rsync, curl, jq | any recent | Deploy and verify scripts |
 | Python | 3.14 for the app (tested 3.14.10); 3.10+ for repository scripts | App tests, catalog validation |
@@ -125,7 +126,7 @@ Plus a cloud account you control. Use a **dedicated lab account**, not one that 
 
 ```bash
 scripts/validate.sh              # everything that can run locally (uses Docker for missing linters)
-scripts/validate.sh terraform    # one group: terraform | cloudinit | shell | docker | yaml | workflows | kubernetes | compose | mermaid | links | catalog | app | secrets
+scripts/validate.sh terraform    # one group: terraform | cloudinit | shell | docker | yaml | workflows | kubernetes | helm | compose | mermaid | links | catalog | app | secrets
 ```
 
 The same checks run in [GitHub Actions](.github/workflows/validate.yml) with read-only permissions.

@@ -2,6 +2,9 @@ extends: default
 ignore: |
   **/node_modules/
   **/.terraform/
+  # Helm templates are Go templates, not YAML; scripts/validate.sh helm lints and renders them.
+  shared/helm-charts/*/templates/
+  projects/*/*/gitops/*/templates/
 rules:
   line-length: { max: 140 }
   document-start: disable

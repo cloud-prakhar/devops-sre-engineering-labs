@@ -248,10 +248,14 @@ projects:
   build_hours: 6
   depends_on:
   - aws-07
+  - aws-06
   services:
-  - EKS
-  - AWS Load Balancer Controller
-  - Metrics Server
+  - EKS (AWS 07)
+  - AWS Load Balancer Controller v3.6.2
+  - Application Load Balancer
+  - EKS Pod Identity
+  - VPC CNI network policy agent
+  - metrics-server
   skills: &id008
   - services
   - ingress
@@ -263,13 +267,14 @@ projects:
   - rolling-updates
   free_tier:
     fit: 'no'
-    notes: EKS control plane is billed per hour on every plan
-  status: planned
+    notes: Runs on the billed AWS 07 EKS cluster and adds an ALB (~$0.04/h; the ALB alone is free-tier eligible
+      on legacy accounts)
+  status: implemented
   validation:
-    static: not-run
-    local: not-run
+    static: passed
+    local: n/a
     deployment: not-tested
-  planned_path: projects/aws/08-kubernetes-networking-autoscaling
+  path: projects/aws/08-kubernetes-networking-autoscaling
 - id: aws-09
   cloud: aws
   number: 9
@@ -277,13 +282,14 @@ projects:
   difficulty: advanced
   build_hours: 6
   depends_on:
+  - aws-07
   - aws-06
-  - aws-08
   services:
-  - EKS
-  - ECR
-  - Argo CD
+  - EKS (AWS 07)
+  - Argo CD v3.6.1 (chart 10.18.0)
   - Helm
+  - ApplicationSet
+  - GitHub
   skills: &id009
   - helm
   - gitops
@@ -293,13 +299,14 @@ projects:
   - rollback
   free_tier:
     fit: 'no'
-    notes: EKS control plane is billed per hour on every plan
-  status: planned
+    notes: Runs on the billed AWS 07 EKS cluster; Argo CD needs a third t3.small node (~$0.02/h). No AWS resources
+      of its own
+  status: implemented
   validation:
-    static: not-run
-    local: not-run
+    static: passed
+    local: passed
     deployment: not-tested
-  planned_path: projects/aws/09-helm-argocd-gitops
+  path: projects/aws/09-helm-argocd-gitops
 - id: aws-10
   cloud: aws
   number: 10

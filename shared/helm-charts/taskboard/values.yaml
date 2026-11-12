@@ -1,0 +1,46 @@
+# Defaults mirror the AWS 07/08 Kustomize manifests. Environments override them in their own values
+# files (projects/aws/09-helm-argocd-gitops/environments/<env>/values.yaml).
+
+image:
+  # ECR repository URI, e.g. 123456789012.dkr.ecr.us-east-1.amazonaws.com/lab06/taskboard-api
+  repository: ""
+  # Required. Deploy by digest only (sha256:<64 hex>); tags are rejected by values.schema.json.
+  digest: ""
+
+# Reported by /api/info and set as app.kubernetes.io/version.
+version: dev
+
+# Used only when autoscaling is disabled (the HPA owns the replica count otherwise).
+replicaCount: 2
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 60
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 96Mi
+  limits:
+    memory: 256Mi
+
+config:
+  DATABASE_URL: sqlite:////data/taskboard.db
+  LOG_LEVEL: INFO
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+ingress:
+  # An internet-facing ALB (AWS Load Balancer Controller, AWS 08). Billed while it exists.
+  enabled: false
+  inboundCidrs: ""            # required when enabled, e.g. 203.0.113.10/32
+  tags: Repository=devops-sre-engineering-labs
+
+networkPolicy:
+  enabled: true
+  # ALB ENI range allowed to reach pods (public subnets of the AWS 07 VPC).
+  albSourceCidr: 10.70.0.0/23

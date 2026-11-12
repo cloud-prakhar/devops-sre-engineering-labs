@@ -1,0 +1,14 @@
+# Set by the root Application that Terraform creates (terraform/argocd.tf), so this repository works
+# from any fork without editing.
+repoURL: ""
+targetRevision: main
+chartPath: shared/helm-charts/taskboard
+valuesPath: projects/aws/09-helm-argocd-gitops/environments
+
+environments:
+  # dev: every commit to main is applied automatically and drift is reverted (self-heal).
+  - name: dev
+    autoSync: true
+  # prod: Argo CD shows the diff; a human syncs (scripts/sync-prod.sh or the UI).
+  - name: prod
+    autoSync: false

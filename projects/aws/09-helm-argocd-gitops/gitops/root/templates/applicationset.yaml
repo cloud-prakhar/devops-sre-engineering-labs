@@ -1,0 +1,64 @@
+# One Application per environment. Two sources: the chart, and this repository again as "$values" so the
+# per-environment values file can live outside the chart directory.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: taskboard
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+          {{- range .Values.environments }}
+          - env: {{ .name }}
+            autoSync: {{ .autoSync }}
+          {{- end }}
+  template:
+    metadata:
+      name: 'taskboard-{{ "{{" }}.env{{ "}}" }}'
+      labels:
+        app.kubernetes.io/part-of: devops-sre-engineering-labs
+      # Deleting the Application also deletes what it deployed (cascade), so cleanup leaves nothing behind.
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: taskboard
+      sources:
+        - repoURL: {{ .Values.repoURL | quote }}
+          targetRevision: {{ .Values.targetRevision | quote }}
+          path: {{ .Values.chartPath | quote }}
+          helm:
+            releaseName: taskboard
+            valueFiles:
+              - '$values/{{ .Values.valuesPath }}/{{ "{{" }}.env{{ "}}" }}/values.yaml'
+        - repoURL: {{ .Values.repoURL | quote }}
+          targetRevision: {{ .Values.targetRevision | quote }}
+          ref: values
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: 'taskboard-{{ "{{" }}.env{{ "}}" }}'
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+        managedNamespaceMetadata:
+          labels:
+            pod-security.kubernetes.io/enforce: restricted
+            pod-security.kubernetes.io/enforce-version: latest
+        retry:
+          limit: 3
+          backoff:
+            duration: 10s
+            factor: 2
+            maxDuration: 2m
+  # Automated sync (with prune and self-heal) only where the environment asks for it.
+  templatePatch: |
+    {{ "{{-" }} if .autoSync {{ "}}" }}
+    spec:
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+    {{ "{{-" }} end {{ "}}" }}

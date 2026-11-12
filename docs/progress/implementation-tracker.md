@@ -26,8 +26,8 @@ deploy come from the catalog's `validation` fields.
 | aws-05 | [Highly Available Server Application](../../projects/aws/05-highly-available-server-app/) | partial | implemented | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ passed | n/a | ⏳ not tested |
 | aws-06 | [Secure CI/CD and Container Registry](../../projects/aws/06-secure-cicd-container-registry/) | fits | implemented | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ passed | ✅ passed | ⏳ not tested |
 | aws-07 | [Managed Kubernetes Foundations](../../projects/aws/07-managed-kubernetes-foundations/) | no | implemented | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ passed | n/a | ⏳ not tested |
-| aws-08 | Kubernetes Networking and Autoscaling | no | planned | — | — | — | — | — | — | — | — | — | — | — |
-| aws-09 | Helm and Argo CD GitOps | no | planned | — | — | — | — | — | — | — | — | — | — | — |
+| aws-08 | [Kubernetes Networking and Autoscaling](../../projects/aws/08-kubernetes-networking-autoscaling/) | no | implemented | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ passed | n/a | ⏳ not tested |
+| aws-09 | [Helm and Argo CD GitOps](../../projects/aws/09-helm-argocd-gitops/) | no | implemented | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ passed | ✅ passed | ⏳ not tested |
 | aws-10 | Stateful Kubernetes Workloads | no | planned | — | — | — | — | — | — | — | — | — | — | — |
 | aws-11 | Prometheus, Grafana and Alertmanager | no | planned | — | — | — | — | — | — | — | — | — | — | — |
 | aws-12 | Centralized Logging with Elastic Stack | no | planned | — | — | — | — | — | — | — | — | — | — | — |
@@ -201,3 +201,36 @@ db.t4g.micro — resolves an AWS 05 risk), `aws ec2 describe-instance-types --fi
 cluster was blocked by the environment's permission policy (downloading and executing the kind binary).
 
 **Next:** AWS 08 Kubernetes networking and autoscaling (plan in CLAUDE.md).
+
+### 2026-11-12 (session 4) — AWS 08, AWS 09
+
+**Implemented:** AWS 08 Kubernetes Networking and Autoscaling (AWS Load Balancer Controller v3.6.2 via
+Helm with Pod Identity and the vendored official IAM policy; ALB Ingress with IP targets; HPA; PDB;
+default-deny NetworkPolicies; surge-only rollouts; load/drain/rollout/policy drills) and AWS 09 Helm and
+Argo CD GitOps (shared Taskboard Helm chart with a digest-only values schema; Argo CD v3.6.1 bootstrapped
+by Terraform with a single root Application; app-of-apps chart with AppProject + ApplicationSet; dev
+auto-sync/self-heal, prod manual sync; promotion by commit; rollback by revert). New concept guides:
+Kubernetes traffic and scaling, Helm and GitOps. New validation group: `helm`. AWS 07 gained
+`enable_network_policy` (vpc-cni `enableNetworkPolicy`). All lock files moved to AWS provider 6.73.0.
+
+**Validation actually run (final results, all passed):**
+
+| Check | Result |
+|---|---|
+| `scripts/validate.sh` — all 14 groups (terraform, cloudinit, shell, docker, yaml, workflows, kubernetes, helm, compose, mermaid, links, catalog, app, secrets) | passed (after excluding Helm templates from yamllint) |
+| Terraform validate + tflint + trivy for 10 stacks, incl. AWS 08 and AWS 09 (helm provider 3.3.0) | passed |
+| LBC IAM policy size (IAM managed-policy limit 6,144 chars) | 5,196 chars minified |
+| AWS 08 kustomization: `replicas` removed, surge strategy applied; kubeconform 1.37 strict (incl. drill Job) | 23 resources valid |
+| Taskboard chart: `helm lint` + `template` with CI, dev and prod values; schema rejects tag digests and `0.0.0.0/0`; missing image fails | passed |
+| gitops-root chart rendered; AppProject + ApplicationSet vs Argo CD CRD schemas (datreeio catalog) | valid |
+| Real argo-cd 10.18.0 and argocd-apps 2.0.8 charts rendered with the lab's values | 45 objects; 5 workloads (no Dex/notifications); settings land in argocd-cm/params |
+| `promote.sh` in a scratch git worktree: tag refused, dev and prod promotions committed, idempotent, placeholder guard | passed (worktree and branch removed) |
+| Mermaid (137 diagrams) | passed |
+
+**Earlier CI evidence:** the `aws-06-delivery` verify job (tests, build, trivy gate, SBOM) passed on
+GitHub for commit 974b555.
+
+**Not run:** any `terraform plan/apply`; the AWS LBC, Argo CD and NetworkPolicy behaviour on a live
+cluster. No AWS calls were made this session.
+
+**Next:** AWS 10 Stateful Kubernetes workloads (plan in CLAUDE.md).

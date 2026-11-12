@@ -1,0 +1,16 @@
+# Taskboard in namespace taskboard-dev. Argo CD applies every change to this file automatically.
+# image.repository and image.digest are written by scripts/promote.sh dev (from AWS 06's ECR).
+image:
+  repository: 000000000000.dkr.ecr.us-east-1.amazonaws.com/lab06/taskboard-api
+  digest: sha256:0000000000000000000000000000000000000000000000000000000000000000
+version: initial
+replicaCount: 1
+autoscaling:
+  enabled: false
+podDisruptionBudget:
+  enabled: false        # a single dev replica cannot satisfy a PDB
+config:
+  DATABASE_URL: sqlite:////data/taskboard.db
+  LOG_LEVEL: DEBUG
+ingress:
+  enabled: false

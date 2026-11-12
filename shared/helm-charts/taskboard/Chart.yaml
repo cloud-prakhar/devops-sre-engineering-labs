@@ -1,0 +1,9 @@
+apiVersion: v2
+name: taskboard
+description: Taskboard API — the shared sample workload, packaged for Helm and GitOps (AWS 09+)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+kubeVersion: ">=1.33.0-0"
+maintainers:
+  - name: devops-sre-engineering-labs

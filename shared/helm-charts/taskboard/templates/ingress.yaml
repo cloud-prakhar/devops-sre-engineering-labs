@@ -1,0 +1,26 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "taskboard.name" . }}
+  labels:
+    {{- include "taskboard.labels" . | nindent 4 }}
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /readyz
+    alb.ingress.kubernetes.io/inbound-cidrs: {{ required "ingress.inboundCidrs is required when ingress is enabled" .Values.ingress.inboundCidrs | quote }}
+    alb.ingress.kubernetes.io/tags: {{ printf "%s,Release=%s" .Values.ingress.tags .Release.Name | quote }}
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "taskboard.name" . }}
+                port:
+                  name: http
+{{- end }}
